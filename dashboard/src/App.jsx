@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
+import Container from "./Container";
+
 
 export default function App() {
-  const [health, setHealth] = useState(null);
-
-  useEffect(() => {
-    fetch("/api/health/")
-      .then(res => res.json())
-      .then(setHealth)
-      .catch(console.error);
-  }, []);
-
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Satellite Health Dashboard</h1>
-      <pre>{JSON.stringify(health, null, 2)}</pre>
-    </main>
+    <>
+      <main style={{ padding: 24 }}>
+        <Navbar />
+
+        <h1>Satellite Health Dashboard</h1>
+
+        <Container title="Telemetry">
+          <p>Live stream coming soon…</p>
+        </Container>
+
+        <Container title="Battery Status" icon="🔋">
+          <strong>Voltage:</strong> 3.98 V
+        </Container>
+      </main>
+    </>
   );
 }
