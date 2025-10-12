@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
-import Container from "./Container";
-
+import Container from "./components/Container";
+import Login from "./pages/Login";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 export default function App() {
   return (
     <>
-      <main style={{ padding: 24 }}>
-        <Navbar />
-
-        <h1>Satellite Health Dashboard</h1>
-
-        <Container title="Telemetry">
-          <p>Live stream coming soon…</p>
-        </Container>
-
-        <Container title="Battery Status" icon="🔋">
-          <strong>Voltage:</strong> 3.98 V
-        </Container>
-      </main>
+      <Navbar />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<div style={{ padding: 24 }}>Dashboard home</div>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   );
 }
