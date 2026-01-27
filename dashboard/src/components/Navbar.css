@@ -1,0 +1,41 @@
+/* src/components/Navbar.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0f1115;
+  color: #ffffff;
+  padding: 0 2rem;
+  height: 60px;
+  border-bottom: 1px solid #2d3139;
+  font-family: 'Inter', sans-serif;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 1.2rem;
+  color: #e2e8f0;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-item {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover {
+  color: #f8fafc;
+}
+
+.nav-item.active {
+  color: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}

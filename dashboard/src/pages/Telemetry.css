@@ -1,0 +1,83 @@
+/* src/pages/Telemetry.css */
+.telemetry-page {
+  padding: 2rem;
+  background-color: #0b0d11;
+  min-height: 100%;
+  color: #e2e8f0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.subsystem-select, .export-btn {
+  background: #1a1e26;
+  border: 1px solid #2d3139;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.telemetry-card {
+  background: #1a1e26;
+  border: 1px solid #2d3139;
+  border-radius: 4px;
+  padding: 1rem;
+  transition: transform 0.1s;
+}
+
+.telemetry-card:hover { border-color: #475569; }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.telemetry-card.warning .status-indicator { background: #f59e0b; }
+.telemetry-card.warning { border-left: 3px solid #f59e0b; }
+
+.value-display { margin-bottom: 0.2rem; }
+.value { font-size: 1.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.unit { color: #64748b; margin-left: 4px; font-size: 0.9rem; }
+.label-display { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+
+.card-footer { margin-top: 1rem; border-top: 1px solid #2d3139; padding-top: 0.5rem; color: #475569; font-size: 0.65rem; }
+
+.log-container {
+  background: #000;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  height: 150px;
+  overflow-y: auto;
+}
+
+.log-entry { margin: 4px 0; color: #10b981; }
+.log-entry.warn { color: #f59e0b; }

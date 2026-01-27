@@ -1,0 +1,141 @@
+/* src/pages/Home.css */
+.home-layout {
+  display: flex;
+  height: calc(100vh - 60px);
+  background-color: #0b0d11;
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #12151c;
+  border-right: 1px solid #2d3139;
+  padding: 1.5rem;
+}
+
+.sidebar-title {
+  font-size: 0.75rem;
+  color: #64748b;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.source-list {
+  list-style: none;
+  padding: 0;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.green { background: #22c55e; }
+.yellow { background: #eab308; }
+.grey { background: #64748b; }
+
+/* Dashboard Grid */
+.dashboard-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.panel {
+  background-color: #1a1e26;
+  border: 1px solid #2d3139;
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #2d3139;
+  padding-bottom: 0.5rem;
+}
+
+.panel-header h4 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Specific Panel Components */
+.api-badge {
+  font-size: 0.65rem;
+  background: #2d3139;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.map-placeholder, .image-placeholder, .chart-placeholder {
+  flex: 1;
+  background: #0f1115;
+  border: 1px dashed #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.mock-json {
+  font-size: 0.7rem;
+  background: #000;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  color: #10b981;
+  overflow: hidden;
+}
+
+.telemetry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.telemetry-table th { text-align: left; color: #64748b; padding-bottom: 8px; }
+.telemetry-table td { padding: 8px 0; border-bottom: 1px solid #2d3139; }
+
+.badge-ok { color: #22c55e; }
+.badge-warn { color: #f59e0b; }
+
+.metric-cards {
+  display: flex;
+  gap: 10px;
+}
+
+.m-card {
+  flex: 1;
+  background: #2d3139;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.m-card small { font-size: 0.65rem; color: #94a3b8; }
+.m-card span { font-size: 1.1rem; font-weight: 600; }
