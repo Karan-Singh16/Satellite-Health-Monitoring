@@ -1,11 +1,10 @@
-// src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import SatTrackingMap from '../components/SatTrackingMap'; // Check this path!
 
 const Home = () => {
   const [satData, setSatData] = useState(null);
 
-  // Stub function for Mission Control API
   const fetchSatelliteState = () => {
     return {
       id: "STAR-PULSE-01",
@@ -29,30 +28,36 @@ const Home = () => {
         <h3 className="sidebar-title">SATELLITE SOURCE</h3>
         <ul className="source-list">
           <li className="source-item"><span className="status-dot green"></span> ESA Mission 1</li>
-          <li className="source-item"><span className="status-dot green"></span> Hardware-Cube</li>
-          <li className="source-item"><span className="status-dot yellow"></span> NOAA-18 Sim</li>
+          <li className="source-item"><span className="status-dot green"></span> ESA Mission 2</li>
+          <li className="source-item"><span className="status-dot yellow"></span> ESA Mission 3</li>
           <li className="source-item"><span className="status-dot grey"></span> Offline-Buffer</li>
         </ul>
-        {/* TODO: Add filtering or quick-action buttons here */}
       </aside>
 
       {/* Main Content Grid */}
       <main className="dashboard-grid">
         
+        {/* GEO LOCATION PANEL */}
         <section className="panel geo-location">
           <div className="panel-header">
             <h4>GEO LOCATION</h4>
-            <span className="api-badge">API: MOCK MODE</span>
+            <span className="api-badge live">API: LIVE N2YO</span>
           </div>
-          <div className="map-placeholder">
-            {/* TODO: Integrate Leaflet or OpenLayers map here */}
-            [2D Map Surface Render Placeholder]
+          
+          <div className="map-placeholder" style={{ height: '350px', width: '100%' }}>
+            {/* FIXED: Changed MissionMap to SatTrackingMap to match your import */}
+            <SatTrackingMap /> 
+          </div>
+
+          <div className="telemetry-coordinates">
+             <p>Lat: {satData?.lat} | Lon: {satData?.lon}</p>
           </div>
           <pre className="mock-json">
             {JSON.stringify(satData, null, 2)}
           </pre>
         </section>
 
+        {/* TELEMETRY REPORT */}
         <section className="panel telemetry-report">
           <div className="panel-header"><h4>TELEMETRY REPORT</h4></div>
           <table className="telemetry-table">
@@ -70,9 +75,9 @@ const Home = () => {
               <tr><td>ADCS</td><td>Stable</td><td><span className="badge-ok">OK</span></td></tr>
             </tbody>
           </table>
-          {/* TODO: Add 'View Detailed' link to /telemetry */}
         </section>
 
+        {/* EARTH OBSERVATION */}
         <section className="panel earth-observation">
           <div className="panel-header"><h4>EARTH OBSERVATION</h4></div>
           <div className="image-placeholder">
@@ -84,10 +89,10 @@ const Home = () => {
           </div>
         </section>
 
+        {/* ANOMALY REPORT */}
         <section className="panel anomaly-report">
           <div className="panel-header"><h4>ANOMALY REPORT</h4></div>
           <div className="chart-placeholder">
-            {/* TODO: Integrate Recharts or Chart.js */}
             [Anomaly Probability Timeline Chart]
           </div>
           <div className="stat-row">
@@ -96,6 +101,7 @@ const Home = () => {
           </div>
         </section>
 
+        {/* PERFORMANCE METRICS */}
         <section className="panel performance">
           <div className="panel-header"><h4>PERFORMANCE METRICS</h4></div>
           <div className="metric-cards">

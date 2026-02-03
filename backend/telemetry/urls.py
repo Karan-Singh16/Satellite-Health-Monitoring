@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from .views import TelemetryListView
 
 urlpatterns = [
-    path("health/", views.health, name="health"),
+    # This makes the URL: /api/telemetry/
+    path('telemetry/', TelemetryListView.as_view(), name='telemetry-list'),
 ]

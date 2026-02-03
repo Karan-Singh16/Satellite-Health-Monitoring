@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Telemetry from './pages/Telemetry';
 import Anomalies from './pages/Anomalies';
+import Footer from './components/Footer';
 
 // Remaining placeholders
 const Alerts = () => <div style={{ padding: '2rem', color: '#fff' }}>Alert Management Placeholder</div>;
@@ -28,6 +29,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </Router>
   );

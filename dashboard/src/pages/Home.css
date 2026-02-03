@@ -9,7 +9,7 @@
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
+  width: 150px;
   background-color: #12151c;
   border-right: 1px solid #2d3139;
   padding: 1.5rem;
@@ -139,3 +139,9 @@
 
 .m-card small { font-size: 0.65rem; color: #94a3b8; }
 .m-card span { font-size: 1.1rem; font-weight: 600; }
+
+.leaflet-container {
+    z-index: 1; /* Ensures map stays inside its panel */
+    height: 100%;
+    width: 100%;
+}

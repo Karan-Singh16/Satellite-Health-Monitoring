@@ -1,22 +1,24 @@
 // src/components/Navbar.jsx
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
+import logoImg from '../assets/LogoC.png';
 
 const Navbar = () => {
   const links = [
     { path: '/', label: 'Home' },
     { path: '/telemetry', label: 'Telemetry' },
     { path: '/anomalies', label: 'Anomalies' },
-    { path: '/alerts', label: 'Alerts' },
-    { path: '/subsystems', label: 'Subsystems' },
     { path: '/reports', label: 'Reports' },
     { path: '/settings', label: 'Settings' },
   ];
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">STAR-Pulse</div>
+      <Link to="/" className="navbar-logo">
+        <img src={logoImg} alt="STAR-Pulse Logo" className="logo-image" />
+        <span className="navbar-title">STAR-Pulse</span>
+      </Link>
       <div className="navbar-links">
         {links.map((link) => (
           <NavLink 

@@ -1,0 +1,80 @@
+.app-footer {
+  background-color: #0d1117; /* Dark space blue */
+  color: #c9d1d9;
+  padding: 2rem 1rem 1rem 1rem;
+  border-top: 1px solid #30363d;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: auto; /* Pushes footer to bottom if container is flex */
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.footer-brand h4 {
+  color: #58a6ff; /* Star-pulse Blue */
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 1px;
+}
+
+.footer-brand p {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-nav a {
+  color: #c9d1d9;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.footer-nav a:hover {
+  color: #58a6ff;
+}
+
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  background: rgba(88, 166, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(88, 166, 255, 0.2);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: #238636; /* Green for "Active" */
+  border-radius: 50%;
+  box-shadow: 0 0 8px #238636;
+  animation: pulse 2s infinite;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #21262d;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
