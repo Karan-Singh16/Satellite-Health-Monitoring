@@ -7,7 +7,7 @@ import Telemetry from './pages/Telemetry';
 import Anomalies from './pages/Anomalies';
 import Footer from './components/Footer';
 
-// Remaining placeholders
+// Placeholders
 const Alerts = () => <div style={{ padding: '2rem', color: '#fff' }}>Alert Management Placeholder</div>;
 const Subsystems = () => <div style={{ padding: '2rem', color: '#fff' }}>Subsystem Health Placeholder</div>;
 const Reports = () => <div style={{ padding: '2rem', color: '#fff' }}>Mission Reports Placeholder</div>;

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-// FIXED: Combined imports into one line
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'; 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 let DefaultIcon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
@@ -33,13 +31,11 @@ export default function SatTrackingMap() {
         const data = await res.json();
         
         if (data.positions && data.positions.length > 0) {
-          // FIX: Changed satlat -> satlatitude and satlng -> satlongitude
           const latest = data.positions[0];
           const newPos = [latest.satlatitude, latest.satlongitude];
           
           setPos(newPos);
 
-          // FIX: Update the orbit path mapping as well
           const path = data.positions.map(p => [p.satlatitude, p.satlongitude]);
           setOrbitPath(path);
           

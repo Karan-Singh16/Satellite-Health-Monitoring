@@ -33,7 +33,7 @@ body {
   display: block;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #242424; /* already set via :root; keep if you like */
+  background-color: #242424; 
   color: rgba(255, 255, 255, 0.87);
   overflow-x: hidden;
 }

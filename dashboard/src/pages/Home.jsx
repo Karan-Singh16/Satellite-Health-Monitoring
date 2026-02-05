@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
-import SatTrackingMap from '../components/SatTrackingMap'; // Check this path!
+import SatTrackingMap from '../components/SatTrackingMap'; 
 
 const Home = () => {
   const [satData, setSatData] = useState(null);
@@ -37,7 +37,7 @@ const Home = () => {
       {/* Main Content Grid */}
       <main className="dashboard-grid">
         
-        {/* GEO LOCATION PANEL */}
+        {/* Geo location */}
         <section className="panel geo-location">
           <div className="panel-header">
             <h4>GEO LOCATION</h4>
@@ -45,7 +45,6 @@ const Home = () => {
           </div>
           
           <div className="map-placeholder" style={{ height: '350px', width: '100%' }}>
-            {/* FIXED: Changed MissionMap to SatTrackingMap to match your import */}
             <SatTrackingMap /> 
           </div>
 
@@ -57,7 +56,7 @@ const Home = () => {
           </pre>
         </section>
 
-        {/* TELEMETRY REPORT */}
+        {/* Telemetry report */}
         <section className="panel telemetry-report">
           <div className="panel-header"><h4>TELEMETRY REPORT</h4></div>
           <table className="telemetry-table">
@@ -77,7 +76,7 @@ const Home = () => {
           </table>
         </section>
 
-        {/* EARTH OBSERVATION */}
+        {/* Earth observation */}
         <section className="panel earth-observation">
           <div className="panel-header"><h4>EARTH OBSERVATION</h4></div>
           <div className="image-placeholder">
@@ -89,7 +88,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* ANOMALY REPORT */}
+        {/* Anomaly report */}
         <section className="panel anomaly-report">
           <div className="panel-header"><h4>ANOMALY REPORT</h4></div>
           <div className="chart-placeholder">
@@ -101,7 +100,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* PERFORMANCE METRICS */}
+        {/* Performance metrics */}
         <section className="panel performance">
           <div className="panel-header"><h4>PERFORMANCE METRICS</h4></div>
           <div className="metric-cards">

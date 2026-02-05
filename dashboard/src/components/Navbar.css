@@ -20,7 +20,7 @@
 
 .logo-image {
   height: 50px; 
-  width: auto; /* Keeps the logo's proportions correct */
+  width: auto; 
   object-fit: contain;
 }
 

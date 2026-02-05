@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './Telemetry.css';
 
 const Telemetry = () => {
-  // Mocking the ESA dataset structure (Anonymized Channels)
+  // ESA dataset structure (Anonymized Channels)
   const [channels] = useState([
     { id: 'channel_41', label: 'EPS_VOLT_01', value: '28.42', unit: 'V', status: 'Nominal' },
     { id: 'channel_42', label: 'EPS_CURR_01', value: '1.24', unit: 'A', status: 'Nominal' },
@@ -42,7 +42,7 @@ const Telemetry = () => {
               </div>
               <div className="label-display">{ch.label}</div>
             </div>
-            {/* TODO: Add mini sparkline chart here later */}
+            {/* Add mini sparkline chart here later */}
             <div className="card-footer">
               <small>Last updated: 2s ago</small>
             </div>
@@ -53,7 +53,7 @@ const Telemetry = () => {
       <section className="raw-log">
         <h4>Recent Data Packets</h4>
         <div className="log-container">
-          {/* TODO: Map live data stream here */}
+          {/* Map live data stream here */}
           <p className="log-entry"><code>[12:44:01] INGEST: Packet Received from ESA_MISSION_1 (Size: 1024b)</code></p>
           <p className="log-entry"><code>[12:44:03] DECODE: CH_41 -> 28.42V, CH_42 -> 1.24A</code></p>
           <p className="log-entry warn"><code>[12:44:05] ALERT: CH_46 SNR below threshold (14.2 dB)</code></p>

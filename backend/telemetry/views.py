@@ -18,7 +18,7 @@ def get_satellite_location(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-# This serves data to your React "Home" and "Telemetry" pages
+# Data for Home and Telemetry pages
 class TelemetryListView(generics.ListAPIView):
     queryset = TelemetryRecord.objects.all()[:200] # Return latest 200 rows
     serializer_class = TelemetrySerializer
