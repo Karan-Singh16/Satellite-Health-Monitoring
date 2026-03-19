@@ -1,17 +1,79 @@
 // src/pages/Telemetry.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Telemetry.css';
 
 const Telemetry = () => {
-  // ESA dataset structure (Anonymized Channels)
-  const [channels] = useState([
-    { id: 'channel_41', label: 'EPS_VOLT_01', value: '28.42', unit: 'V', status: 'Nominal' },
-    { id: 'channel_42', label: 'EPS_CURR_01', value: '1.24', unit: 'A', status: 'Nominal' },
-    { id: 'channel_43', label: 'TCS_TEMP_01', value: '-12.4', unit: '°C', status: 'Nominal' },
-    { id: 'channel_44', label: 'AOCS_GYRO_X', value: '0.002', unit: 'deg/s', status: 'Nominal' },
-    { id: 'channel_45', label: 'AOCS_GYRO_Y', value: '0.001', unit: 'deg/s', status: 'Nominal' },
-    { id: 'channel_46', label: 'COMMS_SNR', value: '14.2', unit: 'dB', status: 'Warning' },
+  const [logs, setLogs] = useState([]);
+  
+  // The complete set of 16 features used by the STAR-Pulse ML models
+  const [channels, setChannels] = useState([
+    // --- Raw Base Features (10) ---
+    { id: 'EPS_VOLT_01', ml_feature: 'battery_voltage', label: 'Battery Voltage', value: '28.4', unit: 'V', status: 'Nominal' },
+    { id: 'EPS_CURR_01', ml_feature: 'average_current', label: 'Avg Current', value: '1.24', unit: 'A', status: 'Nominal' },
+    { id: 'EPS_TEMP_01', ml_feature: 'EPS_temperature', label: 'EPS Temp', value: '-12.4', unit: '°C', status: 'Nominal' },
+    { id: 'BNO_TEMP_01', ml_feature: 'BNO055_temperature', label: 'BNO055 Temp', value: '18.2', unit: '°C', status: 'Nominal' },
+    { id: 'GYRO_X_01', ml_feature: 'gyro_X', label: 'Gyro X', value: '0.002', unit: 'd/s', status: 'Nominal' },
+    { id: 'GYRO_Y_01', ml_feature: 'gyro_Y', label: 'Gyro Y', value: '0.001', unit: 'd/s', status: 'Nominal' },
+    { id: 'GYRO_Z_01', ml_feature: 'gyro_Z', label: 'Gyro Z', value: '0.005', unit: 'd/s', status: 'Nominal' },
+    { id: 'MAG_X_01', ml_feature: 'mag_X', label: 'Mag X', value: '-14.2', unit: 'uT', status: 'Nominal' },
+    { id: 'MAG_Y_01', ml_feature: 'mag_Y', label: 'Mag Y', value: '22.1', unit: 'uT', status: 'Nominal' },
+    { id: 'MAG_Z_01', ml_feature: 'mag_Z', label: 'Mag Z', value: '8.4', unit: 'uT', status: 'Nominal' },
+    
+    // --- Engineered Features (6) ---
+    { id: 'ENG_DELT_V', ml_feature: 'delta_battery_voltage', label: 'Delta Volt', value: '-0.01', unit: 'V/s', status: 'Nominal' },
+    { id: 'ENG_DELT_T', ml_feature: 'delta_EPS_temp', label: 'Delta EPS Temp', value: '0.05', unit: '°C/s', status: 'Nominal' },
+    { id: 'ENG_DELT_A', ml_feature: 'delta_altitude', label: 'Delta Altitude', value: '-1.2', unit: 'm/s', status: 'Nominal' },
+    { id: 'ENG_MAG_TOT', ml_feature: 'mag_total', label: 'Total Mag Vector', value: '27.5', unit: 'uT', status: 'Nominal' },
+    { id: 'ENG_GYRO_TOT', ml_feature: 'gyro_total', label: 'Total Gyro Vector', value: '0.006', unit: 'd/s', status: 'Nominal' },
+    { id: 'ENG_PWR_DISC', ml_feature: 'power_discrepancy', label: 'Power Discrepancy', value: '0.12', unit: 'W', status: 'Nominal' },
   ]);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('starPulseResults');
+    
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      
+      const newLogs = [
+        `[SYSTEM] ML Pipeline Sync: OK.`,
+        `[ENGINE] Summary: ${parsedData.summary.total_rows} frames analyzed.`,
+        `[ENGINE] Validation: ${parsedData.summary.flight_ready_anomalies} verified flight alarms.`,
+      ];
+
+      // Sets to track which features are failing
+      const primaryFailures = new Set();
+      const secondaryFailures = new Set();
+
+      parsedData.anomalies_only.forEach(row => {
+        if (row.top_causes && row.top_causes.length > 0) {
+          // The #1 feature is the primary cause (Red)
+          primaryFailures.add(row.top_causes[0].feature);
+          
+          // Features #2 and #3 are secondary contributors (Amber)
+          row.top_causes.slice(1).forEach(c => secondaryFailures.add(c.feature));
+        }
+      });
+
+      if (primaryFailures.size > 0) {
+        newLogs.push(`[CRITICAL] Primary failures detected in: ${Array.from(primaryFailures).slice(0, 3).join(', ')}`);
+      }
+
+      setLogs(newLogs);
+
+      // Update the Telemetry Cards with 3-state logic
+      setChannels(prevChannels => 
+        prevChannels.map(ch => {
+          if (primaryFailures.has(ch.ml_feature)) {
+            return { ...ch, status: 'Severe' }; // Red
+          }
+          if (secondaryFailures.has(ch.ml_feature)) {
+            return { ...ch, status: 'Warning' }; // Amber
+          }
+          return { ...ch, status: 'Nominal' }; // Green
+        })
+      );
+    }
+  }, []);
 
   return (
     <div className="telemetry-page">
@@ -23,6 +85,7 @@ const Telemetry = () => {
             <option>Power (EPS)</option>
             <option>Thermal (TCS)</option>
             <option>Attitude (AOCS)</option>
+            <option>ML Engineering</option>
           </select>
           <button className="export-btn">Export CSV</button>
         </div>
@@ -42,21 +105,25 @@ const Telemetry = () => {
               </div>
               <div className="label-display">{ch.label}</div>
             </div>
-            {/* Add mini sparkline chart here later */}
             <div className="card-footer">
-              <small>Last updated: 2s ago</small>
+              <small>Status: {ch.status.toUpperCase()}</small>
             </div>
           </div>
         ))}
       </div>
 
       <section className="raw-log">
-        <h4>Recent Data Packets</h4>
+        <h4>Pipeline Output Stream</h4>
         <div className="log-container">
-          {/* Map live data stream here */}
-          <p className="log-entry"><code>[12:44:01] INGEST: Packet Received from ESA_MISSION_1 (Size: 1024b)</code></p>
-          <p className="log-entry"><code>[12:44:03] DECODE: CH_41 -> 28.42V, CH_42 -> 1.24A</code></p>
-          <p className="log-entry warn"><code>[12:44:05] ALERT: CH_46 SNR below threshold (14.2 dB)</code></p>
+          {logs.length === 0 ? (
+            <p className="log-entry" style={{color: '#64748b'}}>Awaiting telemetry ingestion from dashboard...</p>
+          ) : (
+            logs.map((log, index) => (
+              <p key={index} className={`log-entry ${log.includes('[CRITICAL]') ? 'warn' : ''}`}>
+                <code>{log}</code>
+              </p>
+            ))
+          )}
         </div>
       </section>
     </div>

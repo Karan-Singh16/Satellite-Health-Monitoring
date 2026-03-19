@@ -1,9 +1,10 @@
 import React from "react";
 import "./Sign-Up.css";
 
-function Login() {
+function SignUp() {
     return(
-        <div className="login-container">
+        <div className="Signup-container">
+            <img src="/src/assets/Logo.png" alt="STAR-Pulse Logo" className="Signup-logo" />
             <h2>Sign up</h2>
             <form className="login-form">
                 <label htmlFor="username">Username:</label>
@@ -19,3 +20,5 @@ function Login() {
     );
 
 }
+
+export default SignUp;

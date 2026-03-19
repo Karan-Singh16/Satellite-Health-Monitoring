@@ -1,37 +1,166 @@
 /* src/pages/Anomalies.css */
-.anomalies-page { padding: 2rem; background-color: #0b0d11; min-height: 100%; color: #e2e8f0; }
-
-.status-badge {
-  background: #2d3139;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  margin-left: 10px;
-  border: 1px solid #475569;
+.anomalies-page {
+  padding: 2rem;
+  background-color: #0b0d11;
+  min-height: 100vh;
+  color: #e2e8f0;
 }
 
-.anomaly-layout { display: flex; flex-direction: column; gap: 2rem; }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
 
-.anomaly-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: #1a1e26; border-radius: 4px; overflow: hidden; }
+.subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
 
-.anomaly-table th { background: #12151c; text-align: left; padding: 12px; font-size: 0.8rem; color: #64748b; }
+.status-badge {
+  background: #1a1e26;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  margin-left: 10px;
+  border: 1px solid #2d3139;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
 
-.anomaly-table td { padding: 12px; border-bottom: 1px solid #2d3139; font-size: 0.85rem; }
+/* Layout */
+.anomaly-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-.tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-.tag.high { background: #ef4444; color: #fff; }
-.tag.low { background: #3b82f6; color: #fff; }
+.anomaly-list-container {
+  background: #161920;
+  border: 1px solid #2d3139;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
 
-.score-cell { font-family: monospace; color: #10b981; }
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+
+.list-header h3 { font-size: 1rem; color: #f8fafc; }
+.list-header small { color: #475569; font-size: 0.75rem; }
+
+/* Table Styling */
+.table-wrapper {
+  overflow-x: auto;
+  max-height: 500px;
+}
+
+.anomaly-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.anomaly-table th {
+  background: #0f1115;
+  text-align: left;
+  padding: 12px;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+}
+
+.anomaly-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #2d3139;
+  font-size: 0.85rem;
+}
+
+.anomaly-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Cell Specifics */
+.id-cell { font-weight: bold; color: #3b82f6; }
+.time-cell { color: #94a3b8; font-family: monospace; }
+.score-cell { font-family: 'JetBrains Mono', monospace; color: #10b981; }
+
+/* Badge Stack for Root Causes */
+.badge-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cause-tag {
+  background: #2d3139;
+  color: #94a3b8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  border: 1px solid transparent;
+}
+
+.cause-tag.primary {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Severity Tags */
+.severity-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.severity-tag.high {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Empty State */
+.empty-state-container {
+  text-align: center;
+  padding: 4rem;
+  color: #475569;
+}
+
+.empty-state-container span {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+
+/* Workspace Placeholder */
+.analysis-view {
+  background: #161920;
+  border: 1px solid #2d3139;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
 
 .workspace-placeholder {
-  height: 300px;
-  background: #0f1115;
+  height: 250px;
+  background: #0b0d11;
   border: 1px dashed #2d3139;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  margin-top: 1rem;
+}
+
+.placeholder-content {
   text-align: center;
-  padding: 2rem;
+  color: #475569;
+  font-size: 0.85rem;
 }

@@ -1,0 +1,29 @@
+.splash-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000; /* Matching your dashboard theme */
+}
+
+.logo {
+  height: 800px; /* Adjust size as needed */
+  width: auto;
+  animation: pulseFade 2.7s ease-in-out forwards;
+}
+
+@keyframes pulseFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

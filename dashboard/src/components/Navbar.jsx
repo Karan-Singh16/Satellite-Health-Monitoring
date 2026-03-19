@@ -2,11 +2,11 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
-import logoImg from '../assets/LogoC.png';
+import logoImg from '../assets/Logo.png';
 
 const Navbar = () => {
   const links = [
-    { path: '/', label: 'Home' },
+    { path: '/dashboard', label: 'Home' },
     { path: '/telemetry', label: 'Telemetry' },
     { path: '/anomalies', label: 'Anomalies' },
     { path: '/reports', label: 'Reports' },
@@ -15,7 +15,7 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar-logo">
+      <Link to="/dashboard" className="navbar-logo">
         <img src={logoImg} alt="STAR-Pulse Logo" className="logo-image" />
         <span className="navbar-title">STAR-Pulse</span>
       </Link>

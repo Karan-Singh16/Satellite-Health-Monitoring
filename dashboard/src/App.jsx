@@ -1,36 +1,52 @@
 // src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Telemetry from './pages/Telemetry';
 import Anomalies from './pages/Anomalies';
+import Reports from './pages/Reports'; // Added back
 import Footer from './components/Footer';
+import Login from './pages/Login';
+import SplashScreen from './pages/SplashScreen';
 
-// Placeholders
-const Alerts = () => <div style={{ padding: '2rem', color: '#fff' }}>Alert Management Placeholder</div>;
-const Subsystems = () => <div style={{ padding: '2rem', color: '#fff' }}>Subsystem Health Placeholder</div>;
-const Reports = () => <div style={{ padding: '2rem', color: '#fff' }}>Mission Reports Placeholder</div>;
-const Settings = () => <div style={{ padding: '2rem', color: '#fff' }}>System Settings Placeholder</div>;
+// This helper component hides the Navbar/Footer on specific pages
+const LayoutWrapper = ({ children }) => {
+  const location = useLocation();
+  
+  // Hide UI elements on Splash (/) and Login (/login)
+  // Note: Your dashboard is now at /dashboard, so we keep UI hidden for the landing pages
+  const hideUI = location.pathname === '/' || location.pathname === '/login';
+
+  return (
+    <div className="app-container">
+      {!hideUI && <Navbar />}
+      <main className="content-area">
+        {children}
+      </main>
+      {!hideUI && <Footer />}
+    </div>
+  );
+};
 
 function App() {
   return (
     <Router>
-      <div className="app-container">
-        <Navbar />
-        <main className="content-area">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/telemetry" element={<Telemetry />} />
-            <Route path="/anomalies" element={<Anomalies />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/subsystems" element={<Subsystems />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <LayoutWrapper>
+        <Routes>
+          {/* Landing / Entry Routes (UI Hidden) */}
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Main Dashboard Routes (UI Visible) */}
+          <Route path="/dashboard" element={<Home />} />
+          <Route path="/telemetry" element={<Telemetry />} />
+          <Route path="/anomalies" element={<Anomalies />} />
+          <Route path="/reports" element={<Reports />} />
+          
+          {/* You can add a /settings route here later */}
+        </Routes>
+      </LayoutWrapper>
     </Router>
   );
 }

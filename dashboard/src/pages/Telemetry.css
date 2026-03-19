@@ -61,6 +61,19 @@
 
 .telemetry-card.warning .status-indicator { background: #f59e0b; }
 .telemetry-card.warning { border-left: 3px solid #f59e0b; }
+.telemetry-card.nominal { border-left: 4px solid #22c55e; }
+.telemetry-card.warning { border-left: 4px solid #f59e0b; }
+.telemetry-card.severe { 
+  border-left: 4px solid #ef4444; 
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.05), #1a1e26);
+  animation: danger-pulse 2s infinite;
+}
+
+@keyframes danger-pulse {
+  0% { box-shadow: 0 0 0px rgba(239, 68, 68, 0); }
+  50% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+  100% { box-shadow: 0 0 0px rgba(239, 68, 68, 0); }
+}
 
 .value-display { margin-bottom: 0.2rem; }
 .value { font-size: 1.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
