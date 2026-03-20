@@ -1,118 +1,296 @@
 /* src/pages/Reports.css */
+
+/* --- 1. Base Layout & Typography --- */
 .reports-page {
-  padding: 2rem;
-  background: #0b0d11;
+  padding: 2.5rem;
+  background-color: #0b0d11;
   min-height: 100vh;
   color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
+.report-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* --- 2. Header Section --- */
 .report-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-bottom: 2.5rem;
-  border-bottom: 1px solid #2d3139;
+  border-bottom: 1px solid #1e293b;
   padding-bottom: 1.5rem;
 }
 
-.model-tag {
-  font-size: 0.75rem;
-  color: #64748b;
-  background: #1a1e26;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid #2d3139;
+.header-titles h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
 }
 
+.header-titles .subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* --- 3. Action Buttons --- */
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.download-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+.download-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px -1px rgba(16, 185, 129, 0.3);
+}
+
+.print-btn {
+  background: #334155;
+  color: #f8fafc;
+  border: 1px solid #475569;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.print-btn:hover {
+  background: #1e293b;
+  border-color: #64748b;
+}
+
+/* --- 4. Key Performance Indicators (KPIs) --- */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .metric-card {
   background: #161920;
-  padding: 1.5rem;
+  padding: 1.8rem 1.5rem;
   border-radius: 8px;
   border: 1px solid #2d3139;
   text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
 }
 
-.metric-card h5 { color: #64748b; font-size: 0.7rem; margin-bottom: 10px; letter-spacing: 1px; }
-.metric-card p { font-size: 2rem; font-weight: 800; color: #3b82f6; margin: 0; }
-.metric-card small { color: #475569; font-size: 0.7rem; }
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+}
 
+.metric-card h5 {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  letter-spacing: 1px;
+}
+
+.metric-card p {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #3b82f6;
+  margin: 0 0 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.metric-card small {
+  color: #64748b;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- 5. Analysis Layout & Cards --- */
 .analysis-row {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
-.chart-section {
+.report-card {
   background: #161920;
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 8px;
   border: 1px solid #2d3139;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
-.chart-section h3 { font-size: 0.9rem; margin-bottom: 1.5rem; color: #94a3b8; }
+.report-card h3 {
+  font-size: 1.1rem;
+  color: #f1f5f9;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #1e293b;
+}
 
-/* Confusion Matrix Grid */
+/* --- 6. Confusion Matrix Styling --- */
 .matrix-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 1.5rem;
+  gap: 12px;
 }
 
 .m-cell {
-  padding: 15px;
+  padding: 1.5rem;
   text-align: center;
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  border: 1px solid transparent;
 }
 
-.m-cell small { font-size: 0.6rem; margin-bottom: 5px; opacity: 0.8; }
-.m-cell span { font-size: 1.2rem; font-weight: bold; }
+.m-cell small {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  opacity: 0.8;
+  letter-spacing: 0.5px;
+}
 
-.tp { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-.tn { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
-.fp { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-.fn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.m-cell span {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Scientific Color Coding */
+.tp { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.25); }
+.tn { background: rgba(34, 197, 94, 0.05); color: #22c55e; border-color: rgba(34, 197, 94, 0.15); }
+.fp { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.25); }
+.fn { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.25); }
 
 .formula-display {
   text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: #64748b;
-  padding: 10px;
+  margin-top: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #94a3b8;
   background: #0b0d11;
-  border-radius: 4px;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #1e293b;
 }
 
-.conclusion {
-  background: #161920;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #2d3139;
+/* --- 7. Methodology & Glossary --- */
+.method-item {
+  margin-bottom: 1.5rem;
+  padding-left: 1rem;
+  border-left: 3px solid #3b82f6;
+}
+
+.method-item:last-child {
+  margin-bottom: 0;
+}
+
+.method-item strong {
+  display: block;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.method-item p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
   line-height: 1.6;
 }
 
-.print-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
+.glossary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.glossary-table th {
+  text-align: left;
+  color: #64748b;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1e293b;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.glossary-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #1e293b;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.glossary-table td:first-child {
+  font-family: 'JetBrains Mono', monospace;
+  color: #60a5fa;
   font-size: 0.8rem;
 }
 
+/* --- 8. Print Optimization (PDF Export) --- */
 @media print {
-  .reports-page { background: white; color: black; }
-  .print-btn, .nav-links { display: none; }
+  body { background: white; }
+  .reports-page { background: white; color: black; padding: 0; }
+  
+  /* Hide UI Elements */
+  .header-actions, .sidebar, nav, .main-nav { display: none !important; }
+  
+  .report-header { border-bottom: 2px solid #000; margin-bottom: 2rem; }
+  .header-titles h2 { color: #000; }
+  .header-titles .subtitle { color: #333; }
+  
+  /* Strip dark mode styles for clean printing */
+  .metric-card, .report-card {
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+  
+  .report-card h3 { color: #000; border-bottom: 1px solid #eee; }
+  .metric-card p, .m-cell span { color: #000 !important; }
+  .metric-card h5, .metric-card small { color: #555; }
+  
+  .m-cell { border: 1px solid #ddd; }
+  .tp, .tn, .fp, .fn { background: #f9f9f9 !important; border-color: #ccc !important; color: #000 !important; }
+  
+  .formula-display { background: #f5f5f5; border: 1px solid #ddd; color: #000; }
+  .method-item p, .glossary-table td { color: #333; }
+  .glossary-table td:first-child { color: #000; font-weight: bold; }
+}
+
+/* --- 9. Responsive Design --- */
+@media (max-width: 1024px) {
+  .analysis-row { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .report-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
 }

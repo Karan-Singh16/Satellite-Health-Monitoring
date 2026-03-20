@@ -1,24 +1,20 @@
 /* src/pages/Home.css */
+
+/* --- 1. Base Layout --- */
 .home-layout {
   display: flex;
-  height: calc(100vh - 60px);
   background-color: #0b0d11;
+  min-height: 100vh;
   color: #e2e8f0;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Custom Scrollbar for the whole app */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #0b0d11; }
-::-webkit-scrollbar-thumb { background: #2d3139; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-/* Sidebar - Widened to 240px to fit controls nicely */
+/* --- 2. Sidebar Navigation & Sources --- */
 .sidebar {
-  width: 240px; 
-  background-color: #12151c;
-  border-right: 1px solid #2d3139;
-  padding: 1.5rem;
+  width: 280px;
+  background-color: #11141b;
+  padding: 2rem 1.5rem;
+  border-right: 1px solid #1e293b;
   display: flex;
   flex-direction: column;
 }
@@ -26,215 +22,289 @@
 .sidebar-title {
   font-size: 0.75rem;
   color: #64748b;
+  margin-bottom: 1.2rem;
   letter-spacing: 1.5px;
-  margin-bottom: 1rem;
   text-transform: uppercase;
+  font-weight: 700;
 }
 
 .source-list {
   list-style: none;
   padding: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .source-item {
+  font-size: 0.85rem;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0.6rem 0;
-  font-size: 0.85rem;
-  color: #cbd5e1;
-  border-bottom: 1px solid rgba(45, 49, 57, 0.5);
+  gap: 12px;
+  color: #94a3b8;
+  transition: color 0.2s;
 }
 
+.source-item.active {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+/* Glowing Status Dots */
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  box-shadow: 0 0 5px currentColor; /* Adds a subtle glow */
+  display: inline-block;
 }
+.status-dot.green { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+.status-dot.yellow { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+.status-dot.grey { background: #475569; }
 
-.green { background: #22c55e; color: #22c55e; }
-.yellow { background: #eab308; color: #eab308; }
-.grey { background: #64748b; color: #64748b; }
-
-/* ========================================= */
-/* NEW: Sleek Data Ingestion UI */
-/* ========================================= */
+/* --- 3. Data Ingestion Controls --- */
 .upload-container {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-/* Hide the ugly default input */
-input[type="file"] {
-  display: none;
-}
-
-/* Style the label to look like a modern dropzone/button */
 .custom-file-upload {
-  border: 1px dashed #475569;
-  border-radius: 6px;
-  padding: 0.8rem;
+  background: #161920;
+  border: 1px dashed #334155;
+  color: #cbd5e1;
+  padding: 12px;
   text-align: center;
-  font-size: 0.75rem;
-  color: #94a3b8;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background: rgba(15, 17, 21, 0.5);
 }
 
 .custom-file-upload:hover {
+  background: #1e293b;
   border-color: #3b82f6;
-  color: #60a5fa;
-  background: rgba(59, 130, 246, 0.05);
 }
 
 .custom-file-upload.file-selected {
-  border-style: solid;
-  border-color: #10b981;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.05);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid #3b82f6;
+  color: #60a5fa;
+  font-weight: 600;
 }
 
 .run-ml-btn {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: #3b82f6;
   color: white;
   border: none;
-  padding: 0.8rem;
+  padding: 14px;
   border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 1px;
+  font-weight: 700;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.run-ml-btn:hover:not(:disabled) {
-  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
-  transform: translateY(-1px);
-}
+.run-ml-btn:hover:not(:disabled) { background: #2563eb; transform: translateY(-1px); }
+.run-ml-btn:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
 
-.run-ml-btn:disabled {
-  background: #2d3139;
-  color: #64748b;
-  cursor: not-allowed;
-  box-shadow: none;
-}
+.run-ml-btn.reset-btn { background: #2d3139; color: #f8fafc; margin-top: 8px; }
+.run-ml-btn.reset-btn:hover { background: #ef4444; }
 
-.run-ml-btn.loading {
-  animation: pulse 1.5s infinite;
-}
+.error-text { color: #ef4444; font-size: 0.75rem; margin-top: 8px; text-align: center; font-weight: 600; }
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.6; }
-  100% { opacity: 1; }
-}
-
-.error-text {
-  color: #ef4444;
-  font-size: 0.75rem;
-  text-align: center;
-}
-
-/* ========================================= */
-/* Dashboard Grid & Panels */
-/* ========================================= */
+/* --- 4. Main Dashboard Grid --- */
 .dashboard-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: auto auto;
+  grid-auto-rows: minmax(min-content, max-content);
   gap: 1.5rem;
-  padding: 1.5rem;
-  overflow-y: auto;
+  padding: 2rem;
+  align-content: start;
 }
 
 .panel {
-  background-color: #161920;
+  background: #161920;
   border: 1px solid #2d3139;
-  border-radius: 8px;
-  padding: 1.25rem;
+  border-radius: 10px;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(45, 49, 57, 0.5);
-  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
 }
 
 .panel-header h4 {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #cbd5e1;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  letter-spacing: 1px;
   margin: 0;
-  letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
-.api-badge {
-  font-size: 0.65rem;
-  background: #2d3139;
+.api-badge.live {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
   padding: 4px 8px;
   border-radius: 4px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  animation: pulse-badge 2s infinite;
 }
 
-.api-badge.live { color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+/* --- 5. Telemetry Tables & Coordinates --- */
+.telemetry-coordinates p {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  color: #60a5fa;
+  margin-top: 1rem;
+  text-align: center;
+  background: #0b0d11;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #1e293b;
+}
 
-.map-placeholder, .image-placeholder, .chart-placeholder {
-  flex: 1;
+.telemetry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.telemetry-table th {
+  text-align: left;
+  color: #64748b;
+  padding-bottom: 10px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.telemetry-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #1e293b;
+  color: #e2e8f0;
+}
+
+.badge-ok { color: #10b981; font-size: 1.2rem; }
+.badge-warn { color: #ef4444; font-size: 1.2rem; animation: pulse-text 1.5s infinite; }
+
+/* --- 6. Visual Placeholders (Map & Imagery) --- */
+.map-placeholder, .image-placeholder {
   background: #0b0d11;
   border: 1px solid #2d3139;
   border-radius: 6px;
+  min-height: 200px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 150px;
   color: #475569;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
+  position: relative;
   overflow: hidden;
 }
 
-.telemetry-coordinates { margin-top: 1rem; font-size: 0.85rem; color: #94a3b8; }
-.mock-json { font-size: 0.75rem; background: #0b0d11; padding: 0.75rem; margin-top: 0.5rem; color: #10b981; border-radius: 4px; border: 1px solid #2d3139; }
+/* Simulated Scanline for Earth Observation */
+.image-placeholder::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 2px;
+  background: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  animation: scanline 4s linear infinite;
+}
 
-.telemetry-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.telemetry-table th { text-align: left; color: #64748b; padding-bottom: 8px; font-weight: 500; }
-.telemetry-table td { padding: 10px 0; border-bottom: 1px solid #2d3139; color: #cbd5e1; }
+@keyframes scanline {
+  0% { top: -5%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 105%; opacity: 0; }
+}
 
-.badge-ok { color: #22c55e; background: rgba(34, 197, 94, 0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
-.badge-warn { color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+/* --- 7. AI Classifier & Alarms --- */
+.alarm-display { margin-top: 0.5rem; }
 
-.metric-cards { display: flex; gap: 10px; }
+.alarm-box {
+  padding: 1.8rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.alarm-box.standby { background: #0b0d11; color: #475569; border-color: #2d3139; }
+.alarm-box.active { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444; animation: danger-flash 2s infinite; }
+.alarm-box.nominal { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: #10b981; }
+
+.stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; }
+.stat-row strong { color: #f8fafc; font-family: 'JetBrains Mono', monospace; }
+
+/* --- 8. Performance Metrics --- */
+.metric-cards {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
 .m-card {
   flex: 1;
   background: #0b0d11;
-  border: 1px solid #2d3139;
-  padding: 15px;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 1.2rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #1e293b;
 }
-.m-card small { font-size: 0.7rem; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
-.m-card span { font-size: 1.25rem; font-weight: 600; color: #e2e8f0; }
 
-.stat-row { display: flex; justify-content: space-around; width: 100%; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #2d3139; font-size: 0.85rem; color: #94a3b8; }
-.stat-row strong { color: #e2e8f0; font-size: 1rem; margin-left: 5px; }
+.m-card small {
+  display: block;
+  font-size: 0.65rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
 
-.leaflet-container { z-index: 1; height: 100%; width: 100%; }
+.m-card span {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #3b82f6;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* --- 9. Animations --- */
+@keyframes pulse-badge {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes pulse-text {
+  0% { opacity: 1; text-shadow: 0 0 0 transparent; }
+  50% { opacity: 0.6; text-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+  100% { opacity: 1; text-shadow: 0 0 0 transparent; }
+}
+
+@keyframes danger-flash {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* --- 10. Responsive Design --- */
+@media (max-width: 1024px) {
+  .home-layout { flex-direction: column; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #1e293b; padding: 1.5rem; }
+  .source-list { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+}

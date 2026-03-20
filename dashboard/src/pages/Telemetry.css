@@ -1,96 +1,287 @@
 /* src/pages/Telemetry.css */
+
+/* --- 1. Page Layout & Typography --- */
 .telemetry-page {
-  padding: 2rem;
+  padding: 2.5rem;
   background-color: #0b0d11;
-  min-height: 100%;
+  min-height: 100vh;
   color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 1.5rem;
 }
 
+.header-text h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.header-text .subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* --- 2. Interactive Controls --- */
 .controls {
   display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
-.subsystem-select, .export-btn {
-  background: #1a1e26;
+.subsystem-select {
+  background: #161920;
+  color: #f1f5f9;
   border: 1px solid #2d3139;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 10px 16px;
+  border-radius: 6px;
   font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
+.subsystem-select:hover, 
+.subsystem-select:focus {
+  border-color: #3b82f6;
+}
+
+.export-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* --- 3. Telemetry Grid & Base Cards --- */
 .telemetry-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .telemetry-card {
-  background: #1a1e26;
+  background: #161920;
   border: 1px solid #2d3139;
-  border-radius: 4px;
-  padding: 1rem;
-  transition: transform 0.1s;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.telemetry-card:hover { border-color: #475569; }
+.telemetry-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
 
 .card-top {
   display: flex;
   justify-content: space-between;
-  font-size: 0.7rem;
-  color: #64748b;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.channel-id {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  letter-spacing: 1px;
 }
 
 .status-indicator {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #22c55e;
 }
 
-.telemetry-card.warning .status-indicator { background: #f59e0b; }
-.telemetry-card.warning { border-left: 3px solid #f59e0b; }
-.telemetry-card.nominal { border-left: 4px solid #22c55e; }
-.telemetry-card.warning { border-left: 4px solid #f59e0b; }
-.telemetry-card.severe { 
-  border-left: 4px solid #ef4444; 
-  background: linear-gradient(to right, rgba(239, 68, 68, 0.05), #1a1e26);
-  animation: danger-pulse 2s infinite;
+/* Card Main Display */
+.card-main {
+  padding: 24px 16px;
+  text-align: center;
+  flex-grow: 1;
 }
 
-@keyframes danger-pulse {
-  0% { box-shadow: 0 0 0px rgba(239, 68, 68, 0); }
-  50% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
-  100% { box-shadow: 0 0 0px rgba(239, 68, 68, 0); }
+.value-display {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
-.value-display { margin-bottom: 0.2rem; }
-.value { font-size: 1.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-.unit { color: #64748b; margin-left: 4px; font-size: 0.9rem; }
-.label-display { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+.value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+}
 
-.card-footer { margin-top: 1rem; border-top: 1px solid #2d3139; padding-top: 0.5rem; color: #475569; font-size: 0.65rem; }
+.unit {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.label-display {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-footer {
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  text-align: right;
+}
+
+.card-footer small {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* --- 4. The 3-State AI Color Logic --- */
+
+/* State 1: Nominal (Green) */
+.telemetry-card.nominal {
+  border-left: 4px solid #10b981;
+}
+.telemetry-card.nominal .status-indicator {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+.telemetry-card.nominal .card-footer small { color: #10b981; }
+
+/* State 2: Warning / Secondary Cause (Amber) */
+.telemetry-card.warning {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, #161920 60%);
+}
+.telemetry-card.warning .status-indicator {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+}
+.telemetry-card.warning .value { color: #f59e0b; }
+.telemetry-card.warning .card-footer small { color: #f59e0b; }
+
+/* State 3: Severe / Primary Sabotage Root Cause (Red) */
+.telemetry-card.severe {
+  border-left: 4px solid #ef4444;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, #161920 70%);
+  border-color: #ef4444;
+  animation: card-pulse 2s infinite;
+}
+.telemetry-card.severe .status-indicator {
+  background: #ef4444;
+  animation: dot-pulse 1.5s infinite;
+}
+.telemetry-card.severe .value { color: #ef4444; }
+.telemetry-card.severe .card-footer small { color: #ef4444; }
+
+@keyframes card-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  70% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes dot-pulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* --- 5. Raw Output Log Terminal --- */
+.raw-log {
+  background: #11141b;
+  border: 1px solid #2d3139;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.raw-log h4 {
+  margin: 0;
+  padding: 12px 20px;
+  background: #161920;
+  border-bottom: 1px solid #2d3139;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
 
 .log-container {
-  background: #000;
-  padding: 1rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.8rem;
-  height: 150px;
+  padding: 15px 20px;
+  height: 220px;
   overflow-y: auto;
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
 }
 
-.log-entry { margin: 4px 0; color: #10b981; }
-.log-entry.warn { color: #f59e0b; }
+/* Custom Scrollbar for Terminal */
+.log-container::-webkit-scrollbar { width: 8px; }
+.log-container::-webkit-scrollbar-track { background: #0b0d11; }
+.log-container::-webkit-scrollbar-thumb { background: #2d3139; border-radius: 4px; }
+.log-container::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+.log-entry {
+  margin: 6px 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.log-entry code { font-family: inherit; }
+
+.log-entry.warn {
+  color: #ef4444;
+}
+
+.log-entry.warn code {
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+}
+
+/* --- 6. Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .telemetry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
