@@ -1,10 +1,8 @@
 // src/pages/Anomalies.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import './Anomalies.css';
 
-// --- Scientific Helper Functions ---
-// Translates the raw IF score into a human-readable 0-100% Intensity
 const calculateHonestIntensity = (rawScore) => {
   if (rawScore >= 0) return 0;
   // Assumes -0.20 is a total system failure (100% deviation)
@@ -12,7 +10,6 @@ const calculateHonestIntensity = (rawScore) => {
   return intensity.toFixed(1);
 };
 
-// Maps intensity to standard aerospace severity levels
 const determineSeverity = (intensity) => {
   if (intensity > 80) return { level: 'CRITICAL', action: 'Immediate Emergency Reset' };
   if (intensity > 40) return { level: 'MEDIUM', action: 'Run Secondary Diagnostics' };
@@ -25,7 +22,6 @@ const Anomalies = () => {
   const [filterLevel, setFilterLevel] = useState('ALL');
   const [summaryStats, setSummaryStats] = useState(null);
 
-  // --- 1. Data Ingestion & Transformation ---
   useEffect(() => {
     const savedData = localStorage.getItem('starPulseResults');
     
@@ -39,9 +35,9 @@ const Anomalies = () => {
         const { level, action } = determineSeverity(intensity);
         
         // Map feature names to human-readable subsystems
-        const primaryFeature = row.top_causes[0]?.feature || 'Unknown';
-        const subsystem = primaryFeature.includes('volt') ? 'Power (EPS)' : 
-                          primaryFeature.includes('gyro') ? 'Attitude (ADCS)' : 
+        const primaryFeature = row.top_causes && row.top_causes.length > 0 ? row.top_causes[0].feature : 'Unknown';
+        const subsystem = primaryFeature.includes('volt') || primaryFeature.includes('curr') || primaryFeature.includes('power') ? 'Power (EPS)' : 
+                          primaryFeature.includes('gyro') || primaryFeature.includes('mag') ? 'Attitude (ADCS)' : 
                           primaryFeature.includes('temp') ? 'Thermal (TCS)' : 'System Bus';
 
         return {
@@ -49,7 +45,7 @@ const Anomalies = () => {
           time: row.timestamp ? new Date(row.timestamp).toLocaleTimeString() : 'N/A',
           subsystem: subsystem,
           primaryFeature: primaryFeature,
-          causes: row.top_causes || [], 
+          causes: row.top_causes || [], // This is the truthful array from Django
           rawScore: rawScore,
           intensity: intensity,
           severity: level,
@@ -57,29 +53,26 @@ const Anomalies = () => {
         };
       });
 
-      // Show newest alarms at the top of the feed
       setDetectedAnomalies(processedAlarms.reverse());
     }
   }, []);
 
-  // --- 2. Filtering Logic ---
   const filteredAnomalies = useMemo(() => {
     if (filterLevel === 'ALL') return detectedAnomalies;
     return detectedAnomalies.filter(a => a.severity === filterLevel);
   }, [detectedAnomalies, filterLevel]);
 
-  // --- 3. Chart Data Formatter ---
-  // Prepares the nested 'causes' array for the Recharts BarChart
+  // Prepares the nested 'causes' array for the Recharts BarChart based purely on Django's Z-Scores
   const getChartData = (causes) => {
+    if (!causes || causes.length === 0) return [];
     return causes.map(c => ({
       feature: c.feature,
-      weight: parseFloat((c.score * 100).toFixed(2)) // Convert fractional weight to %
+      z_score: parseFloat(c.score) // Using the exact 'score' key from your Django extract_top_causes function
     }));
   };
 
   return (
     <div className="anomalies-page">
-      {/* Page Header */}
       <header className="page-header">
         <div className="header-text">
           <h2>Anomaly Detection Center</h2>
@@ -91,24 +84,18 @@ const Anomalies = () => {
         </div>
       </header>
 
-      {/* Main Layout Grid */}
       <div className="anomaly-layout">
         
-        {/* Left Column: Alarm Feed */}
+        {/* LEFT: Alarm Feed */}
         <section className="anomaly-list-container">
           <div className="list-header">
             <div>
               <h3>Verified Flight Alarms ({filteredAnomalies.length})</h3>
-              <small>Filtered via 7-point debounce window</small>
             </div>
-            {/* Filter Controls */}
             <select 
               className="severity-filter" 
               value={filterLevel} 
-              onChange={(e) => {
-                setFilterLevel(e.target.value);
-                setSelectedAnomaly(null); // Clear workspace on filter change
-              }}
+              onChange={(e) => { setFilterLevel(e.target.value); setSelectedAnomaly(null); }}
             >
               <option value="ALL">All Severities</option>
               <option value="CRITICAL">Critical Only</option>
@@ -117,55 +104,38 @@ const Anomalies = () => {
             </select>
           </div>
           
-          {filteredAnomalies.length === 0 ? (
-            <div className="empty-state-container">
-              <p>No anomalies match the current filter criteria.</p>
-              <span>Adjust your filter or upload new telemetry on the Dashboard.</span>
-            </div>
-          ) : (
-            <div className="table-wrapper">
-              <table className="anomaly-table">
-                <thead>
-                  <tr>
-                    <th>Alarm ID</th>
-                    <th>Time</th>
-                    <th>Subsystem</th>
-                    <th>Intensity</th>
-                    <th>Severity</th>
+          <div className="table-wrapper">
+            <table className="anomaly-table">
+              <thead>
+                <tr><th>ID</th><th>Time</th><th>Subsystem</th><th>Intensity</th><th>Severity</th></tr>
+              </thead>
+              <tbody>
+                {filteredAnomalies.map(a => (
+                  <tr 
+                    key={a.id} 
+                    className={`anomaly-row ${selectedAnomaly?.id === a.id ? 'active-row' : ''}`}
+                    onClick={() => setSelectedAnomaly(a)}
+                  >
+                    <td className="id-cell">{a.id}</td>
+                    <td className="time-cell">{a.time}</td>
+                    <td>{a.subsystem}</td>
+                    <td className="score-cell">{a.intensity}%</td>
+                    <td><span className={`severity-tag ${a.severity.toLowerCase()}`}>{a.severity}</span></td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredAnomalies.map(a => (
-                    <tr 
-                      key={a.id} 
-                      className={`anomaly-row ${selectedAnomaly?.id === a.id ? 'active-row' : ''}`}
-                      onClick={() => setSelectedAnomaly(a)}
-                    >
-                      <td className="id-cell">{a.id}</td>
-                      <td className="time-cell">{a.time}</td>
-                      <td><span className="cause-tag primary">{a.subsystem}</span></td>
-                      <td className="score-cell">{a.intensity}%</td>
-                      <td>
-                        <span className={`severity-tag ${a.severity.toLowerCase()}`}>
-                          {a.severity}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
-        {/* Right Column: Deep Investigation Workspace */}
+        {/* RIGHT: Deep Investigation Workspace */}
         <section className="analysis-view">
           <h3>Root Cause Workspace</h3>
           
           {selectedAnomaly ? (
             <div className="workspace-active">
               <div className="workspace-header">
-                <h4>Investigation: {selectedAnomaly.id}</h4>
+                <h4>{selectedAnomaly.id}</h4>
                 <span className={`severity-tag ${selectedAnomaly.severity.toLowerCase()}`}>
                   {selectedAnomaly.severity} PRIORITY
                 </span>
@@ -174,13 +144,7 @@ const Anomalies = () => {
               <div className="intel-grid">
                 <div className="intel-box">
                   <small>DEVIATION INTENSITY</small>
-                  <p style={{ color: selectedAnomaly.severity === 'CRITICAL' ? '#ef4444' : '#3b82f6' }}>
-                    {selectedAnomaly.intensity}%
-                  </p>
-                </div>
-                <div className="intel-box">
-                  <small>TIMESTAMP</small>
-                  <p>{selectedAnomaly.time}</p>
+                  <p style={{ color: selectedAnomaly.severity === 'CRITICAL' ? '#ef4444' : '#3b82f6' }}>{selectedAnomaly.intensity}%</p>
                 </div>
                 <div className="intel-box">
                   <small>PRIMARY FAULT</small>
@@ -188,37 +152,40 @@ const Anomalies = () => {
                 </div>
               </div>
 
-              {/* Dynamic Feature Contribution Chart */}
+              {/* TRUTHFUL FEATURE CONTRIBUTION CHART */}
               <div className="feature-chart-container">
-                <h5>AI Feature Contribution Weights</h5>
-                <div style={{ width: '100%', height: 220, marginTop: '10px' }}>
+                <h5 style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase' }}>
+                  Sensor Z-Score Deviation from Baseline
+                </h5>
+                <div style={{ width: '100%', height: 220, background: '#11141b', padding: '10px', borderRadius: '4px', border: '1px solid #2d3139' }}>
                   <ResponsiveContainer>
                     <BarChart data={getChartData(selectedAnomaly.causes)} layout="vertical" margin={{ left: 30, right: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d3139" horizontal={false} />
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="feature" type="category" stroke="#94a3b8" fontSize={10} width={110} />
+                      <XAxis type="number" stroke="#64748b" fontSize={10} />
+                      <YAxis dataKey="feature" type="category" stroke="#94a3b8" fontSize={10} width={120} />
                       <Tooltip 
                         cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                        contentStyle={{ background: '#1a1e26', border: '1px solid #2d3139', color: '#f8fafc' }}
-                        formatter={(value) => [`${value}%`, 'Weight']}
+                        contentStyle={{ background: '#1a1e26', border: '1px solid #2d3139', color: '#f8fafc', fontSize: '12px' }}
+                        formatter={(value) => [`${value}σ (Z-Score)`, 'Deviation']}
                       />
-                      <Bar dataKey="weight" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="z_score" radius={[0, 4, 4, 0]}>
+                        {getChartData(selectedAnomaly.causes).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : '#3b82f6'} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
               {/* Actionable Intelligence Block */}
-              <div className="action-recommendation">
-                 <strong>SYSTEM RECOMMENDATION:</strong> {selectedAnomaly.action}
+              <div className="action-recommendation" style={{ marginTop: '2rem', padding: '1rem', background: '#11141b', border: '1px solid #2d3139', borderRadius: '4px', color: '#cbd5e1', fontSize: '0.85rem' }}>
+                 <strong style={{ color: '#3b82f6' }}>SYSTEM RECOMMENDATION:</strong> {selectedAnomaly.action}
               </div>
             </div>
           ) : (
-            <div className="workspace-placeholder">
-              <div className="placeholder-content">
-                <p>Select an alarm from the feed to initiate a deep-packet investigation.</p>
-                <div className="mock-chart-line"></div>
-              </div>
+            <div className="workspace-placeholder" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', border: '1px dashed #2d3139', borderRadius: '4px' }}>
+              <p>Select an alarm from the feed to initiate root cause analysis.</p>
             </div>
           )}
         </section>

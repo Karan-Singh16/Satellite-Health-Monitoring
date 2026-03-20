@@ -7,19 +7,15 @@ const Reports = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    // Persistent handshake with LocalStorage
     const saved = localStorage.getItem('starPulseResults');
     if (saved) setData(JSON.parse(saved));
   }, []);
 
-  // SCIENTIFIC BASELINE: Corrected math based on TP:1084, FP:42, FN:12
-  const metrics = {
-    accuracy: "98.1%",
-    precision: "0.963",
-    recall: "0.989",
-    f1_score: "0.976" // (2 * P * R) / (P + R)
-  };
+  // Use the actual performance data passed from Django, or fallback to placeholders if missing
+  const perf = data?.summary?.performance || { latency: '--', throughput: '--', confidence: '--' };
 
+  // Feature Importance is usually static after model training, 
+  // but we can display the weights of the top tracked features here.
   const importanceData = [
     { name: 'Δ Battery Volt', value: 94, color: '#3b82f6' },
     { name: 'EPS Temp', value: 88, color: '#60a5fa' },
@@ -28,47 +24,27 @@ const Reports = () => {
     { name: 'Mag Z', value: 30, color: '#dbeafe' },
   ];
 
-  // HONEST SCALING LOGIC: Translates IF distance to Intensity %
   const calculateHonestIntensity = (rawScore) => {
     if (rawScore >= 0) return 0;
-    // We define -0.20 as "Maximum Deviation" (100%)
-    const intensity = Math.min((Math.abs(rawScore) / 0.2) * 100, 100);
-    return intensity.toFixed(1);
+    return Math.min((Math.abs(rawScore) / 0.2) * 100, 100).toFixed(1);
   };
 
   const downloadMissionDossier = () => {
     if (!data) return;
 
-    const headers = [
-      "Alarm_ID", 
-      "Timestamp", 
-      "Subsystem", 
-      "Primary_Cause", 
-      "Intensity_%", 
-      "Severity", 
-      "Recommended_Action"
-    ];
+    const headers = ["Alarm_ID", "Timestamp", "Subsystem", "Primary_Cause", "Intensity_%", "Severity", "Recommended_Action"];
 
     const rows = data.anomalies_only.map((a, i) => {
       const intensity = calculateHonestIntensity(a.IF_Anomaly_Score);
-      
       let severity = "LOW";
       let action = "Continue Monitoring";
       if (intensity > 80) { severity = "CRITICAL"; action = "Immediate System Reset"; }
       else if (intensity > 40) { severity = "MEDIUM"; action = "Manual Diagnostics Required"; }
 
-      const subsystem = a.top_causes[0]?.feature.includes('volt') ? 'Power (EPS)' : 
-                        a.top_causes[0]?.feature.includes('gyro') ? 'Attitude (ADCS)' : 'Thermal (TCS)';
+      const primaryFeature = a.top_causes && a.top_causes.length > 0 ? a.top_causes[0].feature : 'Unknown';
+      const subsystem = primaryFeature.includes('volt') ? 'Power (EPS)' : primaryFeature.includes('gyro') ? 'Attitude (ADCS)' : 'Thermal (TCS)';
 
-      return [
-        `ALRM-${i + 1}`,
-        a.timestamp,
-        subsystem,
-        a.top_causes[0]?.feature || "Unknown",
-        `${intensity}%`,
-        severity,
-        action
-      ];
+      return [`ALRM-${i + 1}`, a.timestamp, subsystem, primaryFeature, `${intensity}%`, severity, action];
     });
 
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
@@ -87,38 +63,39 @@ const Reports = () => {
       <header className="report-header">
         <div className="header-titles">
           <h2>Mission Evaluation Report</h2>
-          <p className="subtitle">STAR-Pulse Ensemble Model: Isolation Forest + OC-SVM Validation</p>
+          <p className="subtitle">STAR-Pulse Ensemble Model: Isolation Forest + LOF + OC-SVM</p>
         </div>
         <div className="header-actions">
-          <button className="download-btn" onClick={downloadMissionDossier}>DOWNLOAD DOSSIER</button>
+          <button className="download-btn" onClick={downloadMissionDossier}>DOWNLOAD DOSSIER (CSV)</button>
           <button className="print-btn" onClick={() => window.print()}>EXPORT PDF</button>
         </div>
       </header>
 
       <div className="report-container">
-        {/* Row 1: Key Performance Indicators */}
+        
+        {/* ROW 1: TRUTHFUL KPIs from Django */}
         <div className="metrics-grid">
-          <div className="metric-card">
-            <h5>VALIDATION F1</h5>
-            <p>{metrics.f1_score}</p>
-            <small>Optimal Threshold Meta-Score</small>
-          </div>
           <div className="metric-card">
             <h5>SESSION ALARMS</h5>
             <p>{data ? data.summary.flight_ready_anomalies : "0"}</p>
-            <small>Filtered via 7-Point Debounce</small>
+            <small>Flight-Ready (Debounced)</small>
           </div>
           <div className="metric-card">
-            <h5>SYSTEM ACCURACY</h5>
-            <p>{metrics.accuracy}</p>
-            <small>Validated vs Ground Truth</small>
+            <h5>THROUGHPUT</h5>
+            <p>{perf.throughput !== '--' ? `${perf.throughput} f/s` : '--'}</p>
+            <small>Process Speed</small>
+          </div>
+          <div className="metric-card">
+            <h5>AI CONFIDENCE</h5>
+            <p>{perf.confidence !== '--' ? `${perf.confidence}%` : '--'}</p>
+            <small>Ensemble Baseline</small>
           </div>
         </div>
 
-        {/* Row 2: Matrix and Feature Importance */}
+        {/* ROW 2: Matrix & Methodology */}
         <div className="analysis-row">
           <section className="report-card">
-            <h3>Confusion Matrix (Offline Testing)</h3>
+            <h3>Confusion Matrix (Training Baseline)</h3>
             <div className="matrix-grid">
               <div className="m-cell tp"><small>TRUE POSITIVE</small><span>1,084</span></div>
               <div className="m-cell fp"><small>FALSE POSITIVE</small><span>42</span></div>
@@ -126,29 +103,27 @@ const Reports = () => {
               <div className="m-cell tn"><small>TRUE NEGATIVE</small><span>74,856</span></div>
             </div>
             <div className="formula-display">
-               F1 = 2 * (Precision * Recall) / (Precision + Recall)
+               F1 Score: 0.976 | Accuracy: 98.1%
             </div>
           </section>
 
           <section className="report-card">
             <h3>Feature Importance Weights</h3>
-            <div style={{ width: '100%', height: 250 }}>
+            <div style={{ width: '100%', height: 220 }}>
               <ResponsiveContainer>
                 <BarChart data={importanceData} layout="vertical" margin={{ left: 20, right: 30 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d3139" horizontal={false} />
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={11} width={100} />
-                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#1a1e26', border: '1px solid #2d3139' }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {importanceData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                  </Bar>
+                  <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={10} width={100} />
+                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#1a1e26', border: '1px solid #2d3139', fontSize: '12px' }} />
+                  <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </section>
         </div>
 
-        {/* Row 3: Methodology and Feature Glossary */}
+        {/* ROW 3: Definitions */}
         <div className="analysis-row">
           <section className="report-card">
             <h3>Methodology Breakdown</h3>
@@ -157,8 +132,8 @@ const Reports = () => {
               <p>Used for initial high-dimensional outlier detection. Anomalies are isolated via recursive partitioning.</p>
             </div>
             <div className="method-item">
-              <strong>2. Local Outlier Factor (LOF)</strong>
-              <p>Calculates local density deviance. Filters out transient "jitter" that IF might flag as a spike.</p>
+              <strong>2. Local Outlier Factor (LOF) & SVM</strong>
+              <p>Filters out transient "jitter" using density deviance and decision boundaries to validate the IF score.</p>
             </div>
             <div className="method-item">
               <strong>3. Time-Series Debouncing</strong>

@@ -1,6 +1,6 @@
 /* src/pages/Telemetry.css */
 
-/* --- 1. Page Layout & Typography --- */
+/* --- 1. Base Layout --- */
 .telemetry-page {
   padding: 2.5rem;
   background-color: #0b0d11;
@@ -13,115 +13,101 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   border-bottom: 1px solid #1e293b;
-  padding-bottom: 1.5rem;
+  padding-bottom: 1rem;
 }
 
 .header-text h2 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #f8fafc;
   margin: 0;
 }
 
 .header-text .subtitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #64748b;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 /* --- 2. Interactive Controls --- */
 .controls {
   display: flex;
-  gap: 1rem;
+  gap: 12px;
   align-items: center;
 }
 
 .subsystem-select {
-  background: #161920;
-  color: #f1f5f9;
+  background: #11141b;
+  color: #cbd5e1;
   border: 1px solid #2d3139;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
   cursor: pointer;
   outline: none;
   transition: border-color 0.2s;
 }
 
-.subsystem-select:hover, 
-.subsystem-select:focus {
-  border-color: #3b82f6;
-}
+.subsystem-select:hover { border-color: #3b82f6; }
 
 .export-btn {
   background: #3b82f6;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s;
 }
 
-.export-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-}
+.export-btn:hover { background: #2563eb; }
 
-/* --- 3. Telemetry Grid & Base Cards --- */
+/* --- 3. Telemetry Grid & Flat Cards --- */
 .telemetry-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
 }
 
 .telemetry-card {
   background: #161920;
   border: 1px solid #2d3139;
-  border-radius: 8px;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.telemetry-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .card-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.2);
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e293b;
+  background: #11141b;
 }
 
 .channel-id {
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
-  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
   color: #94a3b8;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
+/* Flat dots, no box-shadows */
 .status-indicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
-/* Card Main Display */
 .card-main {
-  padding: 24px 16px;
+  padding: 20px 14px;
   text-align: center;
   flex-grow: 1;
 }
@@ -131,33 +117,33 @@
   justify-content: center;
   align-items: baseline;
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .value {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: #f8fafc;
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .unit {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #64748b;
   font-weight: 600;
 }
 
 .label-display {
-  font-size: 0.8rem;
-  color: #cbd5e1;
+  font-size: 0.75rem;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .card-footer {
-  padding: 10px 16px;
-  background: rgba(0, 0, 0, 0.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  padding: 8px 14px;
+  background: #11141b;
+  border-top: 1px solid #1e293b;
   text-align: right;
 }
 
@@ -167,85 +153,52 @@
   letter-spacing: 0.5px;
 }
 
-/* --- 4. The 3-State AI Color Logic --- */
+/* --- 4. The Flat 3-State AI Logic --- */
 
-/* State 1: Nominal (Green) */
-.telemetry-card.nominal {
-  border-left: 4px solid #10b981;
-}
-.telemetry-card.nominal .status-indicator {
-  background: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
-}
+/* Nominal (Green) */
+.telemetry-card.nominal { border-left: 3px solid #10b981; }
+.telemetry-card.nominal .status-indicator { background: #10b981; }
 .telemetry-card.nominal .card-footer small { color: #10b981; }
 
-/* State 2: Warning / Secondary Cause (Amber) */
-.telemetry-card.warning {
-  border-left: 4px solid #f59e0b;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, #161920 60%);
-}
-.telemetry-card.warning .status-indicator {
-  background: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
-}
+/* Warning (Amber) */
+.telemetry-card.warning { border-left: 3px solid #f59e0b; background: #181612; }
+.telemetry-card.warning .status-indicator { background: #f59e0b; }
 .telemetry-card.warning .value { color: #f59e0b; }
 .telemetry-card.warning .card-footer small { color: #f59e0b; }
 
-/* State 3: Severe / Primary Sabotage Root Cause (Red) */
-.telemetry-card.severe {
-  border-left: 4px solid #ef4444;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, #161920 70%);
-  border-color: #ef4444;
-  animation: card-pulse 2s infinite;
-}
-.telemetry-card.severe .status-indicator {
-  background: #ef4444;
-  animation: dot-pulse 1.5s infinite;
-}
+/* Severe (Red) */
+.telemetry-card.severe { border-left: 3px solid #ef4444; border-color: #ef4444; background: #1a1515; }
+.telemetry-card.severe .status-indicator { background: #ef4444; }
 .telemetry-card.severe .value { color: #ef4444; }
 .telemetry-card.severe .card-footer small { color: #ef4444; }
 
-@keyframes card-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
-  70% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-@keyframes dot-pulse {
-  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-/* --- 5. Raw Output Log Terminal --- */
+/* --- 5. Raw Output Terminal --- */
 .raw-log {
   background: #11141b;
   border: 1px solid #2d3139;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  margin-top: 2rem;
 }
 
 .raw-log h4 {
   margin: 0;
-  padding: 12px 20px;
+  padding: 10px 15px;
   background: #161920;
   border-bottom: 1px solid #2d3139;
   font-size: 0.75rem;
   color: #94a3b8;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 
 .log-container {
-  padding: 15px 20px;
-  height: 220px;
+  padding: 12px 15px;
+  height: 180px;
   overflow-y: auto;
-  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-/* Custom Scrollbar for Terminal */
-.log-container::-webkit-scrollbar { width: 8px; }
+.log-container::-webkit-scrollbar { width: 6px; }
 .log-container::-webkit-scrollbar-track { background: #0b0d11; }
 .log-container::-webkit-scrollbar-thumb { background: #2d3139; border-radius: 4px; }
 .log-container::-webkit-scrollbar-thumb:hover { background: #475569; }
@@ -253,35 +206,14 @@
 .log-entry {
   margin: 6px 0;
   color: #94a3b8;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 0.8rem;
 }
 
-.log-entry code { font-family: inherit; }
-
-.log-entry.warn {
-  color: #ef4444;
-}
-
-.log-entry.warn code {
-  font-weight: 600;
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
-}
+.log-entry.critical { color: #ef4444; font-weight: bold; }
 
 /* --- 6. Mobile Responsiveness --- */
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-  
-  .controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .telemetry-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .controls { width: 100%; justify-content: space-between; }
+  .telemetry-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }

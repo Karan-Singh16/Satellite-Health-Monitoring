@@ -2,95 +2,99 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './Telemetry.css';
 
+// The exact mapping of your Django backend features to the UI
+const TELEMETRY_MAP = [
+  { id: 'EPS_VOLT_01', ml_feature: 'battery_voltage', category: 'Power (EPS)', label: 'Battery Voltage', unit: 'V' },
+  { id: 'EPS_CURR_01', ml_feature: 'average_current', category: 'Power (EPS)', label: 'Avg Current', unit: 'A' },
+  { id: 'EPS_TEMP_01', ml_feature: 'EPS_temperature', category: 'Thermal (TCS)', label: 'EPS Temp', unit: '°C' },
+  { id: 'BNO_TEMP_01', ml_feature: 'BNO055_temperature', category: 'Thermal (TCS)', label: 'BNO055 Temp', unit: '°C' },
+  { id: 'GYRO_X_01', ml_feature: 'gyro_X', category: 'Attitude (ADCS)', label: 'Gyro X', unit: 'd/s' },
+  { id: 'GYRO_Y_01', ml_feature: 'gyro_Y', category: 'Attitude (ADCS)', label: 'Gyro Y', unit: 'd/s' },
+  { id: 'GYRO_Z_01', ml_feature: 'gyro_Z', category: 'Attitude (ADCS)', label: 'Gyro Z', unit: 'd/s' },
+  { id: 'MAG_X_01', ml_feature: 'mag_X', category: 'Attitude (ADCS)', label: 'Mag X', unit: 'uT' },
+  { id: 'MAG_Y_01', ml_feature: 'mag_Y', category: 'Attitude (ADCS)', label: 'Mag Y', unit: 'uT' },
+  { id: 'MAG_Z_01', ml_feature: 'mag_Z', category: 'Attitude (ADCS)', label: 'Mag Z', unit: 'uT' },
+  { id: 'ENG_DELT_V', ml_feature: 'delta_battery_voltage', category: 'ML Engineering', label: 'Delta Volt', unit: 'V/s' },
+  { id: 'ENG_DELT_T', ml_feature: 'delta_EPS_temp', category: 'ML Engineering', label: 'Delta EPS Temp', unit: '°C/s' },
+  { id: 'ENG_DELT_A', ml_feature: 'delta_altitude', category: 'ML Engineering', label: 'Delta Altitude', unit: 'm/s' },
+  { id: 'ENG_MAG_TOT', ml_feature: 'mag_total', category: 'ML Engineering', label: 'Total Mag Vector', unit: 'uT' },
+  { id: 'ENG_GYR_TOT', ml_feature: 'gyro_total', category: 'ML Engineering', label: 'Total Gyro Vector', unit: 'd/s' },
+  { id: 'ENG_PWR_DIS', ml_feature: 'power_discrepancy', category: 'Power (EPS)', label: 'Power Discrepancy', unit: 'W' }
+];
+
 const Telemetry = () => {
   const [logs, setLogs] = useState([]);
   const [selectedSubsystem, setSelectedSubsystem] = useState('All Subsystems');
-  
-  // The complete set of 16 features used by the STAR-Pulse ML models
-  // Added 'category' so the dropdown filter actually works
-  const [channels, setChannels] = useState([
-    // --- Raw Base Features (10) ---
-    { id: 'EPS_VOLT_01', category: 'Power (EPS)', ml_feature: 'battery_voltage', label: 'Battery Voltage', value: '28.4', unit: 'V', status: 'Nominal' },
-    { id: 'EPS_CURR_01', category: 'Power (EPS)', ml_feature: 'average_current', label: 'Avg Current', value: '1.24', unit: 'A', status: 'Nominal' },
-    { id: 'EPS_TEMP_01', category: 'Thermal (TCS)', ml_feature: 'EPS_temperature', label: 'EPS Temp', value: '-12.4', unit: '°C', status: 'Nominal' },
-    { id: 'BNO_TEMP_01', category: 'Thermal (TCS)', ml_feature: 'BNO055_temperature', label: 'BNO055 Temp', value: '18.2', unit: '°C', status: 'Nominal' },
-    { id: 'GYRO_X_01', category: 'Attitude (AOCS)', ml_feature: 'gyro_X', label: 'Gyro X', value: '0.002', unit: 'd/s', status: 'Nominal' },
-    { id: 'GYRO_Y_01', category: 'Attitude (AOCS)', ml_feature: 'gyro_Y', label: 'Gyro Y', value: '0.001', unit: 'd/s', status: 'Nominal' },
-    { id: 'GYRO_Z_01', category: 'Attitude (AOCS)', ml_feature: 'gyro_Z', label: 'Gyro Z', value: '0.005', unit: 'd/s', status: 'Nominal' },
-    { id: 'MAG_X_01', category: 'Attitude (AOCS)', ml_feature: 'mag_X', label: 'Mag X', value: '-14.2', unit: 'uT', status: 'Nominal' },
-    { id: 'MAG_Y_01', category: 'Attitude (AOCS)', ml_feature: 'mag_Y', label: 'Mag Y', value: '22.1', unit: 'uT', status: 'Nominal' },
-    { id: 'MAG_Z_01', category: 'Attitude (AOCS)', ml_feature: 'mag_Z', label: 'Mag Z', value: '8.4', unit: 'uT', status: 'Nominal' },
-    
-    // --- Engineered Features (6) ---
-    { id: 'ENG_DELT_V', category: 'ML Engineering', ml_feature: 'delta_battery_voltage', label: 'Delta Volt', value: '-0.01', unit: 'V/s', status: 'Nominal' },
-    { id: 'ENG_DELT_T', category: 'ML Engineering', ml_feature: 'delta_EPS_temp', label: 'Delta EPS Temp', value: '0.05', unit: '°C/s', status: 'Nominal' },
-    { id: 'ENG_DELT_A', category: 'ML Engineering', ml_feature: 'delta_altitude', label: 'Delta Altitude', value: '-1.2', unit: 'm/s', status: 'Nominal' },
-    { id: 'ENG_MAG_TOT', category: 'ML Engineering', ml_feature: 'mag_total', label: 'Total Mag Vector', value: '27.5', unit: 'uT', status: 'Nominal' },
-    { id: 'ENG_GYRO_TOT', category: 'ML Engineering', ml_feature: 'gyro_total', label: 'Total Gyro Vector', value: '0.006', unit: 'd/s', status: 'Nominal' },
-    { id: 'ENG_PWR_DISC', category: 'Power (EPS)', ml_feature: 'power_discrepancy', label: 'Power Discrepancy', value: '0.12', unit: 'W', status: 'Nominal' },
-  ]);
+  const [channels, setChannels] = useState([]);
 
-  // --- 1. Handshake & AI Logic Processing ---
   useEffect(() => {
     const savedData = localStorage.getItem('starPulseResults');
     
     if (savedData) {
       const parsedData = JSON.parse(savedData);
+      const perf = parsedData.summary.performance || {};
       
-      // Initialize the console log stream
+      // 1. TRUTHFUL TERMINAL LOGS
       const newLogs = [
-        `[SYSTEM] Connecting to Local Data Buffer...`,
-        `[SYSTEM] ML Pipeline Sync: OK.`,
-        `[ENGINE] Summary: ${parsedData.summary.total_rows} telemetry frames analyzed.`,
-        `[ENGINE] Validation: ${parsedData.summary.flight_ready_anomalies} verified flight alarms detected.`,
+        `[SYSTEM] Connected to Django ML Backend.`,
+        `[ENGINE] Processed ${parsedData.summary.total_rows} frames in ${perf.latency || '--'}s.`,
+        `[ENGINE] Pipeline Throughput: ${perf.throughput || '--'} frames/sec.`,
+        `[ENGINE] Flight-Ready Alarms Detected: ${parsedData.summary.flight_ready_anomalies}`
       ];
 
-      // Sets to track which features are failing to drive the 3-state UI
+      // 2. ANALYZE MISSION HEALTH (Determine Red/Amber/Green states)
       const primaryFailures = new Set();
       const secondaryFailures = new Set();
 
       parsedData.anomalies_only.forEach(row => {
         if (row.top_causes && row.top_causes.length > 0) {
-          // The #1 feature is the primary cause (Red/Severe)
-          primaryFailures.add(row.top_causes[0].feature);
-          // Features #2 and #3 are secondary contributors (Amber/Warning)
-          row.top_causes.slice(1).forEach(c => secondaryFailures.add(c.feature));
+          primaryFailures.add(row.top_causes[0].feature); // Primary cause is SEVERE (Red)
+          row.top_causes.slice(1).forEach(c => secondaryFailures.add(c.feature)); // Others are WARNING (Amber)
         }
       });
 
       if (primaryFailures.size > 0) {
-        newLogs.push(`[CRITICAL] Primary fault isolation detected in: ${Array.from(primaryFailures).slice(0, 3).join(', ')}`);
-        newLogs.push(`[WARN] Secondary stress indicators active across ${secondaryFailures.size} subsystems.`);
+        newLogs.push(`[CRITICAL] Fault isolation active. Compromised subsystems detected.`);
       } else {
         newLogs.push(`[SYSTEM] All sensor channels operating within clean baseline.`);
       }
 
       setLogs(newLogs);
 
-      // Update the Telemetry Cards with 3-state logic
-      setChannels(prevChannels => 
-        prevChannels.map(ch => {
-          if (primaryFailures.has(ch.ml_feature)) {
-            return { ...ch, status: 'Severe' }; // Red
-          }
-          if (secondaryFailures.has(ch.ml_feature)) {
-            return { ...ch, status: 'Warning' }; // Amber
-          }
-          return { ...ch, status: 'Nominal' }; // Green
-        })
-      );
+      // 3. MAP REAL DATA TO UI CHANNELS
+      // Grab the absolute latest row of data from the timeseries snapshot to act as our "Live" value
+      const latestRow = parsedData.timeseries && parsedData.timeseries.length > 0 
+        ? parsedData.timeseries[parsedData.timeseries.length - 1] 
+        : {};
+
+      const mappedChannels = TELEMETRY_MAP.map(ch => {
+        // Read truthful value from Django JSON, default to 0 if missing
+        const rawValue = latestRow[ch.ml_feature] !== undefined ? latestRow[ch.ml_feature] : 0;
+        
+        let status = 'Nominal';
+        if (primaryFailures.has(ch.ml_feature)) status = 'Severe';
+        else if (secondaryFailures.has(ch.ml_feature)) status = 'Warning';
+
+        return {
+          ...ch,
+          value: parseFloat(Number(rawValue).toFixed(3)),
+          status: status
+        };
+      });
+
+      setChannels(mappedChannels);
     } else {
       setLogs([`[AWAITING DATA] Please run the ML Pipeline from the Dashboard to ingest telemetry...`]);
+      // Load empty skeleton if no data
+      setChannels(TELEMETRY_MAP.map(ch => ({ ...ch, value: '--', status: 'Nominal' })));
     }
   }, []);
 
-  // --- 2. Filtering Logic ---
   const filteredChannels = useMemo(() => {
     if (selectedSubsystem === 'All Subsystems') return channels;
     return channels.filter(ch => ch.category === selectedSubsystem);
   }, [channels, selectedSubsystem]);
 
-  // --- 3. CSV Export Function ---
   const handleExportCSV = () => {
     const headers = ["Channel_ID", "ML_Feature", "Category", "Current_Value", "Unit", "AI_Status"];
     const rows = filteredChannels.map(ch => [
@@ -113,10 +117,9 @@ const Telemetry = () => {
       <header className="page-header">
         <div className="header-text">
           <h2>Telemetry Explorer</h2>
-          <p className="subtitle">Real-time Multi-Channel Sensor Visualization</p>
+          <p className="subtitle">Real-Time Multi-Channel Sensor Visualization</p>
         </div>
         
-        {/* Interactive Controls */}
         <div className="controls">
           <select 
             className="subsystem-select"
@@ -126,14 +129,13 @@ const Telemetry = () => {
             <option value="All Subsystems">All Subsystems</option>
             <option value="Power (EPS)">Power (EPS)</option>
             <option value="Thermal (TCS)">Thermal (TCS)</option>
-            <option value="Attitude (AOCS)">Attitude (AOCS)</option>
+            <option value="Attitude (ADCS)">Attitude (ADCS)</option>
             <option value="ML Engineering">ML Engineering</option>
           </select>
-          <button className="export-btn" onClick={handleExportCSV}>Export CSV</button>
+          <button className="export-btn" onClick={handleExportCSV}>EXPORT CSV</button>
         </div>
       </header>
 
-      {/* Dynamic Grid displaying the 16 features */}
       <div className="telemetry-grid">
         {filteredChannels.map((ch) => (
           <div key={ch.id} className={`telemetry-card ${ch.status.toLowerCase()}`}>
@@ -149,26 +151,22 @@ const Telemetry = () => {
               <div className="label-display">{ch.label}</div>
             </div>
             <div className="card-footer">
-              <small>Status: {ch.status.toUpperCase()}</small>
+              <small>STATUS: {ch.status.toUpperCase()}</small>
             </div>
           </div>
         ))}
         {filteredChannels.length === 0 && (
-          <p style={{ color: '#64748b', gridColumn: 'span 4', textAlign: 'center', padding: '2rem' }}>
+          <p style={{ color: '#64748b', gridColumn: '1 / -1', textAlign: 'center', padding: '2rem' }}>
             No channels found for this subsystem.
           </p>
         )}
       </div>
 
-      {/* Real-time output log terminal */}
       <section className="raw-log">
-        <h4>Pipeline Output Stream</h4>
+        <h4>Backend Execution Stream</h4>
         <div className="log-container">
           {logs.map((log, index) => (
-            <p 
-              key={index} 
-              className={`log-entry ${log.includes('[CRITICAL]') || log.includes('[WARN]') ? 'warn' : ''}`}
-            >
+            <p key={index} className={`log-entry ${log.includes('[CRITICAL]') ? 'critical' : ''}`}>
               <code>{log}</code>
             </p>
           ))}
