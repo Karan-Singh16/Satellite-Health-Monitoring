@@ -1,5 +1,8 @@
 import pandas as pd
 import requests
+import json
+import os
+from django.conf import settings
 from django.http import JsonResponse
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, parser_classes
@@ -36,7 +39,27 @@ def health(request):
     return Response({"status": "ok", "service": "satellite-backend"})
 
 # ==========================================
-# NEW ML PIPELINE VIEW
+# METRICS API VIEW (FOR REPORTS PAGE)
+# ==========================================
+
+@api_view(['GET'])
+def get_training_metrics(request):
+    """API Endpoint to fetch the latest AI training metrics for the Reports page."""
+    metrics_path = os.path.join(settings.BASE_DIR, 'telemetry', 'ml', 'artifacts', 'training_metrics.json')
+    
+    try:
+        with open(metrics_path, 'r') as f:
+            metrics = json.load(f)
+        return JsonResponse(metrics)
+    except FileNotFoundError:
+        return JsonResponse({
+            "f1_score": 0.0, 
+            "accuracy": 0.0, 
+            "confusion_matrix": {"tn": 0, "fp": 0, "fn": 0, "tp": 0}
+        }, status=404)
+
+# ==========================================
+# ML PIPELINE VIEW
 # ==========================================
 
 @api_view(['POST'])

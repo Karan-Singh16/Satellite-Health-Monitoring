@@ -2,6 +2,7 @@ from pathlib import Path
 import joblib
 import pandas as pd
 import numpy as np
+import json  # The only new import
 
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
@@ -276,6 +277,20 @@ def main():
     joblib.dump(final_model_if, ARTIFACTS_DIR / "if_model.joblib")
     joblib.dump(final_model_lof, ARTIFACTS_DIR / "lof_model.joblib")
     joblib.dump(final_model_svm, ARTIFACTS_DIR / "svm_model.joblib")
+
+    # The ONLY addition to the original main()
+    total_predictions = np.sum(cm)
+    accuracy = (cm[0][0] + cm[1][1]) / total_predictions if total_predictions > 0 else 0
+    metrics = {
+        "f1_score": float(round(f1_debounced, 4)),
+        "accuracy": float(round(accuracy * 100, 1)),
+        "confusion_matrix": {
+            "tn": int(cm[0][0]), "fp": int(cm[0][1]),
+            "fn": int(cm[1][0]), "tp": int(cm[1][1])
+        }
+    }
+    with open(ARTIFACTS_DIR / "training_metrics.json", "w") as f:
+        json.dump(metrics, f, indent=4)
 
     print(f"Saved artefacts to {ARTIFACTS_DIR}")
 

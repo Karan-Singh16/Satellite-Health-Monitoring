@@ -1,10 +1,12 @@
 from django.urls import path
-from .views import TelemetryListView, upload_telemetry
+from . import views
 
 urlpatterns = [
-    # Your existing list view
-    path('telemetry/', TelemetryListView.as_view(), name='telemetry-list'),
+    path('health/', views.health, name='health'),
+    path('location/', views.get_satellite_location, name='satellite-location'),
+    path('telemetry/list/', views.TelemetryListView.as_view(), name='telemetry-list'),
+    path('telemetry/upload/', views.upload_telemetry, name='upload-telemetry'),
     
-    # NEW: The ML upload endpoint (Make sure this line is here!)
-    path('telemetry/upload/', upload_telemetry, name='telemetry-upload'),
+    # NEW METRICS ENDPOINT
+    path('metrics/', views.get_training_metrics, name='training-metrics'),
 ]

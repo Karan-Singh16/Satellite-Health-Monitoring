@@ -22,7 +22,7 @@ def extract_top_causes(row, baseline_means, baseline_stds, features):
     """Calculates Z-scores against the training baseline to find the top 3 anomalies."""
     z_scores = np.abs((row[features] - baseline_means) / baseline_stds)
     top_3 = z_scores.sort_values(ascending=False).head(3)
-    # Changed "z_score" to "score" to match the React frontend expectations
+    # Replaced 'z_score' with 'score' so React reads it correctly
     return [{"feature": k, "score": round(v, 2)} for k, v in top_3.items()]
 
 def analyse_dataframe(df):
@@ -98,9 +98,8 @@ def analyse_dataframe(df):
             "top_causes": causes
         }
         
-        # --- NEW: INJECT RAW SENSOR DATA FOR REACT GRAPHS ---
+        # --- INJECT RAW SENSOR DATA FOR REACT GRAPHS ---
         for feature in advanced_features:
-            # Ensure safe float conversion for JSON serialization
             row_dict[feature] = float(row[feature]) if pd.notnull(row[feature]) else 0.0
 
         results.append(row_dict)
@@ -110,10 +109,7 @@ def analyse_dataframe(df):
     latency_seconds = round(end_time - start_time, 4)
     total_rows = len(df)
     
-    # Prevent division by zero if it processes instantly
     throughput = int(total_rows / latency_seconds) if latency_seconds > 0 else total_rows
-    
-    # You can implement dynamic confidence later. For now, we set an ensemble-based baseline.
     confidence = 98.4 
 
     summary = {

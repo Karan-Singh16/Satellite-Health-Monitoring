@@ -5,17 +5,35 @@ import './Reports.css';
 
 const Reports = () => {
   const [data, setData] = useState(null);
+  
+  // NEW STATE: To hold the live training metrics from Django
+  const [trainMetrics, setTrainMetrics] = useState({
+    f1_score: '--', accuracy: '--',
+    confusion_matrix: { tp: '--', fp: '--', fn: '--', tn: '--' }
+  });
 
   useEffect(() => {
+    // 1. Get Session Data from LocalStorage
     const saved = localStorage.getItem('starPulseResults');
     if (saved) setData(JSON.parse(saved));
+
+    // 2. FETCH REAL TRAINING METRICS FROM DJANGO
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/metrics/");
+        if (response.ok) {
+          const metrics = await response.json();
+          setTrainMetrics(metrics);
+        }
+      } catch (error) {
+        console.error("Failed to fetch training metrics:", error);
+      }
+    };
+    fetchMetrics();
   }, []);
 
-  // Use the actual performance data passed from Django, or fallback to placeholders if missing
   const perf = data?.summary?.performance || { latency: '--', throughput: '--', confidence: '--' };
 
-  // Feature Importance is usually static after model training, 
-  // but we can display the weights of the top tracked features here.
   const importanceData = [
     { name: 'Δ Battery Volt', value: 94, color: '#3b82f6' },
     { name: 'EPS Temp', value: 88, color: '#60a5fa' },
@@ -31,19 +49,15 @@ const Reports = () => {
 
   const downloadMissionDossier = () => {
     if (!data) return;
-
     const headers = ["Alarm_ID", "Timestamp", "Subsystem", "Primary_Cause", "Intensity_%", "Severity", "Recommended_Action"];
-
     const rows = data.anomalies_only.map((a, i) => {
       const intensity = calculateHonestIntensity(a.IF_Anomaly_Score);
       let severity = "LOW";
       let action = "Continue Monitoring";
       if (intensity > 80) { severity = "CRITICAL"; action = "Immediate System Reset"; }
       else if (intensity > 40) { severity = "MEDIUM"; action = "Manual Diagnostics Required"; }
-
       const primaryFeature = a.top_causes && a.top_causes.length > 0 ? a.top_causes[0].feature : 'Unknown';
       const subsystem = primaryFeature.includes('volt') ? 'Power (EPS)' : primaryFeature.includes('gyro') ? 'Attitude (ADCS)' : 'Thermal (TCS)';
-
       return [`ALRM-${i + 1}`, a.timestamp, subsystem, primaryFeature, `${intensity}%`, severity, action];
     });
 
@@ -73,7 +87,7 @@ const Reports = () => {
 
       <div className="report-container">
         
-        {/* ROW 1: TRUTHFUL KPIs from Django */}
+        {/* ROW 1: KPIs */}
         <div className="metrics-grid">
           <div className="metric-card">
             <h5>SESSION ALARMS</h5>
@@ -97,13 +111,14 @@ const Reports = () => {
           <section className="report-card">
             <h3>Confusion Matrix (Training Baseline)</h3>
             <div className="matrix-grid">
-              <div className="m-cell tp"><small>TRUE POSITIVE</small><span>1,084</span></div>
-              <div className="m-cell fp"><small>FALSE POSITIVE</small><span>42</span></div>
-              <div className="m-cell fn"><small>FALSE NEGATIVE</small><span>12</span></div>
-              <div className="m-cell tn"><small>TRUE NEGATIVE</small><span>74,856</span></div>
+              {/* NOW PLUGGING IN REAL DYNAMIC DATA */}
+              <div className="m-cell tp"><small>TRUE POSITIVE</small><span>{trainMetrics.confusion_matrix.tp}</span></div>
+              <div className="m-cell fp"><small>FALSE POSITIVE</small><span>{trainMetrics.confusion_matrix.fp}</span></div>
+              <div className="m-cell fn"><small>FALSE NEGATIVE</small><span>{trainMetrics.confusion_matrix.fn}</span></div>
+              <div className="m-cell tn"><small>TRUE NEGATIVE</small><span>{trainMetrics.confusion_matrix.tn}</span></div>
             </div>
             <div className="formula-display">
-               F1 Score: 0.976 | Accuracy: 98.1%
+               F1 Score: {trainMetrics.f1_score} | Accuracy: {trainMetrics.accuracy}%
             </div>
           </section>
 
