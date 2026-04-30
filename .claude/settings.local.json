@@ -9,7 +9,11 @@
       "PowerShell($pyExe = \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\"; Set-Location \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\"; $env:PYTHONPATH = \".\"; & $pyExe -m telemetry.ml.training.train_models)",
       "PowerShell(cmd /c \"dir /s /b \"\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\\\\telemetry\\\\ml\\\\artifacts\"\"\")",
       "Bash(\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\" manage.py makemigrations telemetry)",
-      "Bash(\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\" manage.py migrate)"
+      "Bash(\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\" manage.py migrate)",
+      "Bash(venv/Scripts/python manage.py showmigrations telemetry)",
+      "Bash(venv/Scripts/pip install *)",
+      "Bash(venv/Scripts/python -m pip install -r requirements.txt)",
+      "Bash(venv/Scripts/python manage.py check)"
     ]
   }
 }

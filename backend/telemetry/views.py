@@ -1,4 +1,3 @@
-import pandas as pd
 import requests
 import json
 import os
@@ -156,6 +155,7 @@ def upload_telemetry(request):
     filename_lower    = original_filename.lower()
 
     try:
+        import pandas as pd
         # Read file into pandas DataFrame based on extension
         if filename_lower.endswith('.csv'):
             df = pd.read_csv(file_obj)
@@ -289,6 +289,7 @@ def upload_benchmark(request):
     filename_lower    = original_filename.lower()
 
     try:
+        import pandas as pd
         if filename_lower.endswith('.csv'):
             df = pd.read_csv(file_obj)
         elif filename_lower.endswith('.xlsx') or filename_lower.endswith('.xls'):
