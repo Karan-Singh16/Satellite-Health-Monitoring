@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venv\\\\Scripts\\\\activate.bat)",
+      "Bash(python -m telemetry.ml.training.train_models)",
+      "PowerShell(cd \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\"; $env:PYTHONPATH = \".\"; .\\\\venv\\\\Scripts\\\\python.exe -m telemetry.ml.training.train_models)",
+      "PowerShell(cd \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\"; $env:PYTHONPATH = \".\"; .\\\\..\\\\venv\\\\Scripts\\\\python.exe -m telemetry.ml.training.train_models)",
+      "PowerShell($pyExe = \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\"; $workDir = \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\"; & $pyExe -c \"import sys; print\\(sys.executable\\)\")",
+      "PowerShell($pyExe = \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\"; Set-Location \"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\"; $env:PYTHONPATH = \".\"; & $pyExe -m telemetry.ml.training.train_models)",
+      "PowerShell(cmd /c \"dir /s /b \"\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\backend\\\\telemetry\\\\ml\\\\artifacts\"\"\")",
+      "Bash(\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\" manage.py makemigrations telemetry)",
+      "Bash(\"C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe\" manage.py migrate)"
+    ]
+  }
+}

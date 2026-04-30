@@ -1,298 +1,188 @@
-from pathlib import Path
+import os
 import joblib
 import pandas as pd
 import numpy as np
-import json  # The only new import
-
+import json
+from pathlib import Path
 from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler
-from sklearn.impute import SimpleImputer
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.svm import OneClassSVM
-from sklearn.metrics import f1_score, roc_auc_score, confusion_matrix, precision_score, recall_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
 
 from telemetry.ml.features import (
     selected_features,
-    feature_dict,
-    advanced_features,
-    engineer_features,
     parse_datetime_column,
+    engineer_feature_specific
 )
 from telemetry.ml.config import (
-    WEIGHT_IF,
-    WEIGHT_LOF,
-    WEIGHT_SVM,
-    VOTE_THRESHOLD,
-    DEBOUNCE_WINDOW,
-    DEBOUNCE_HITS,
+    GLOBAL_IF_CONTAM, GLOBAL_LOF_CONTAM, GLOBAL_SVM_NU, GLOBAL_VOTE_THRESHOLD,
+    FEAT_IF_CONTAM, FEAT_LOF_CONTAM, FEAT_SVM_NU, FEAT_CONSENSUS_THRESHOLD, FEAT_VOTE_THRESHOLD
 )
 
-BASE_DIR = Path(__file__).resolve().parents[3]
-DATA_DIR = BASE_DIR / "data"
+BASE_DIR = Path(__file__).resolve().parents[3]          # = backend/
 ARTIFACTS_DIR = BASE_DIR / "telemetry" / "ml" / "artifacts"
-
-TRAIN_FILE = DATA_DIR / "clean_telemetry.csv"
-TEST_FILE = DATA_DIR / "injected_telemetry.csv"
-
-def extract_root_causes(dataframe, features, baseline_df):
-    anomaly_indices = dataframe[dataframe['Flight_Ready_Anomaly'] == 1].index
-
-    if len(anomaly_indices) == 0:
-        print("All clear. No anomalies detected to analyse.")
-        return
-
-    baseline_mean = baseline_df[features].mean()
-    baseline_std = baseline_df[features].std().replace(0, 1e-8)
-
-    for idx in anomaly_indices[:5]:
-        row_data = dataframe.loc[idx, features]
-        diffs = abs(row_data - baseline_mean) / baseline_std
-        top_causes = diffs.sort_values(ascending=False).head(3)
-
-        timestamp = dataframe.loc[idx, 'UTC_Timestamp']
-        print(f"\nAlarm at {timestamp}")
-        for feature_name, score in top_causes.items():
-            print(f"   {feature_name}: z-score distance = {score:.2f}")
+DATA_FILE = BASE_DIR.parent / "telemetry.xlsx"          # telemetry.xlsx lives in repo root
 
 def main():
-    train_df = pd.read_csv(TRAIN_FILE)
-    test_df = pd.read_csv(TEST_FILE)
+    print(f"Loading dataset from {DATA_FILE}")
+    df = pd.read_excel(DATA_FILE)
 
-    for df_name, temp_df in [("TRAIN", train_df), ("TEST", test_df)]:
-        temp_df = parse_datetime_column(temp_df)
-        if df_name == "TRAIN":
-            train_df = temp_df
-        else:
-            test_df = temp_df
-        print(f"{df_name} dataset shape: {temp_df.shape}")
+    df = parse_datetime_column(df)
+    for col in selected_features:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
-    print("\nTest Ground Truth distribution:")
-    print(test_df['Ground_Truth'].value_counts(dropna=False))
-    print("True contamination in test set:", test_df['Ground_Truth'].mean())
+    print(f"Dataset shape: {df.shape}")
 
-    imputer = SimpleImputer(strategy="mean")
-    scaler = StandardScaler()
+    # Chronological 70/30 split for training and testing
+    split_point = int(len(df) * 0.70)
+    train_df = df.iloc[:split_point].copy()
+    test_df = df.iloc[split_point:].copy()
+    print(f"Training rows: {len(train_df)} | Test rows: {len(test_df)}")
 
-    train_df = engineer_features(train_df)
-    test_df = engineer_features(test_df)
+    GLOBAL_DIR = ARTIFACTS_DIR / "global"
+    FEAT_DIR = ARTIFACTS_DIR / "features"
+    GLOBAL_DIR.mkdir(parents=True, exist_ok=True)
+    FEAT_DIR.mkdir(parents=True, exist_ok=True)
 
-    X_train_raw = train_df[advanced_features].copy()
-    X_test_raw = test_df[advanced_features].copy()
+    # --- MODEL 1: GLOBAL MODEL (fit on train, evaluate on test) ---
+    print("\n--- Training Global Model ---")
+    X_train = train_df[selected_features].copy()
+    X_test = test_df[selected_features].copy()
 
-    X_train_imputed = imputer.fit_transform(X_train_raw)
-    X_test_imputed = imputer.transform(X_test_raw)
+    imputer_global = SimpleImputer(strategy="mean")
+    scaler_global = StandardScaler()
 
-    X_train_scaled = scaler.fit_transform(X_train_imputed)
-    X_test_scaled = scaler.transform(X_test_imputed)
+    X_train_imputed = imputer_global.fit_transform(X_train)
+    X_train_scaled = scaler_global.fit_transform(X_train_imputed)
 
-    print("\n--- ABLATION STUDY ---")
-    baseline_model = IsolationForest(
-        n_estimators=100,
-        contamination=test_df['Ground_Truth'].mean(),
-        random_state=42
-    )
+    X_test_imputed = imputer_global.transform(X_test)
+    X_test_scaled = scaler_global.transform(X_test_imputed)
 
-    X_train_raw_base = train_df[selected_features].copy()
-    X_test_raw_base = test_df[selected_features].copy()
+    global_if = IsolationForest(n_estimators=100, contamination=GLOBAL_IF_CONTAM, random_state=42)
+    global_if.fit(X_train_scaled)
 
-    raw_imputer = SimpleImputer(strategy="mean")
-    raw_scaler = StandardScaler()
+    global_lof = LocalOutlierFactor(n_neighbors=250, contamination=GLOBAL_LOF_CONTAM, novelty=True)
+    global_lof.fit(X_train_scaled)
 
-    X_train_raw_base = raw_imputer.fit_transform(X_train_raw_base)
-    X_test_raw_base = raw_imputer.transform(X_test_raw_base)
+    global_svm = OneClassSVM(nu=GLOBAL_SVM_NU, kernel="rbf", gamma=0.001)
+    global_svm.fit(X_train_scaled)
 
-    X_train_raw_base = raw_scaler.fit_transform(X_train_raw_base)
-    X_test_raw_base = raw_scaler.transform(X_test_raw_base)
+    # Evaluate on test set
+    vote_if = (global_if.predict(X_test_scaled) == -1).astype(int)
+    vote_lof = (global_lof.predict(X_test_scaled) == -1).astype(int)
+    vote_svm = (global_svm.predict(X_test_scaled) == -1).astype(int)
+    global_vote_sum = vote_if + vote_lof + vote_svm
+    global_prediction = (global_vote_sum >= GLOBAL_VOTE_THRESHOLD).astype(int)
 
-    baseline_model.fit(X_train_raw_base)
-    preds_raw = (baseline_model.predict(X_test_raw_base) == -1).astype(int)
-    f1_raw = f1_score(test_df['Ground_Truth'], preds_raw)
+    total_test = len(test_df)
+    if_flags = int(vote_if.sum())
+    lof_flags = int(vote_lof.sum())
+    svm_flags = int(vote_svm.sum())
+    global_consensus_count = int(global_prediction.sum())
 
-    baseline_model.fit(X_train_scaled)
-    preds_eng = (baseline_model.predict(X_test_scaled) == -1).astype(int)
-    f1_eng = f1_score(test_df['Ground_Truth'], preds_eng)
+    print(f"  IF flags: {if_flags} ({if_flags/total_test*100:.2f}%)")
+    print(f"  LOF flags: {lof_flags} ({lof_flags/total_test*100:.2f}%)")
+    print(f"  SVM flags: {svm_flags} ({svm_flags/total_test*100:.2f}%)")
+    print(f"  Global consensus (all 3): {global_consensus_count} ({global_consensus_count/total_test*100:.2f}%)")
 
-    print(f"F1 Score (Raw Features): {f1_raw:.4f}")
-    print(f"F1 Score (Engineered):   {f1_eng:.4f}")
+    joblib.dump(imputer_global, GLOBAL_DIR / "imputer.joblib")
+    joblib.dump(scaler_global, GLOBAL_DIR / "scaler.joblib")
+    joblib.dump(global_if, GLOBAL_DIR / "if_model.joblib")
+    joblib.dump(global_lof, GLOBAL_DIR / "lof_model.joblib")
+    joblib.dump(global_svm, GLOBAL_DIR / "svm_model.joblib")
 
-    print("\n--- TUNE THE ISOLATION FOREST ---")
-    trees_to_test = [50, 100, 200]
-    true_contamination = test_df['Ground_Truth'].mean()
+    # --- MODEL 2: FEATURE-SPECIFIC MODELS ---
+    print("\n--- Training Feature-Specific Models ---")
+    m2_votes = np.zeros(total_test)
+    m2_triggered_lists = [[] for _ in range(total_test)]
 
-    contamination_to_test = sorted(set([
-        0.01,
-        0.02,
-        0.03,
-        round(true_contamination, 4),
-        round(min(0.10, true_contamination * 1.5), 4)
-    ]))
+    for feature in selected_features:
+        print(f"  Processing: {feature}")
+        feat_df_full = engineer_feature_specific(df, feature)
+        feat_train = feat_df_full.iloc[:split_point].copy()
+        feat_test = feat_df_full.iloc[split_point:].copy()
 
-    best_score = -1
-    best_params = {}
+        imputer_feat = SimpleImputer(strategy="mean")
+        scaler_feat = StandardScaler()
 
-    for n in trees_to_test:
-        for c in contamination_to_test:
-            model = IsolationForest(
-                n_estimators=n,
-                contamination=c,
-                random_state=42
-            )
+        feat_train_imputed = imputer_feat.fit_transform(feat_train)
+        feat_train_scaled = scaler_feat.fit_transform(feat_train_imputed)
 
-            model.fit(X_train_scaled)
-            labels = model.predict(X_test_scaled)
-            binary_preds = (labels == -1).astype(int)
+        feat_test_imputed = imputer_feat.transform(feat_test)
+        feat_test_scaled = scaler_feat.transform(feat_test_imputed)
 
-            score = f1_score(test_df['Ground_Truth'], binary_preds)
+        f_if = IsolationForest(n_estimators=50, contamination=FEAT_IF_CONTAM, random_state=42)
+        f_if.fit(feat_train_scaled)
 
-            print(f"Testing n_estimators: {n}, contamination: {c:.5f} | F1 score: {score:.5f}")
+        f_lof = LocalOutlierFactor(n_neighbors=150, contamination=FEAT_LOF_CONTAM, novelty=True)
+        f_lof.fit(feat_train_scaled)
 
-            if score > best_score:
-                best_score = score
-                best_params = {"n_estimators": n, "contamination": c}
+        f_svm = OneClassSVM(nu=FEAT_SVM_NU, kernel="rbf", gamma='auto')
+        f_svm.fit(feat_train_scaled)
 
-    print(f"\nBest Forest: {best_params['n_estimators']} trees, contamination={best_params['contamination']:.5f}, F1={best_score:.5f}")
+        vote_f_if = (f_if.predict(feat_test_scaled) == -1).astype(int)
+        vote_f_lof = (f_lof.predict(feat_test_scaled) == -1).astype(int)
+        vote_f_svm = (f_svm.predict(feat_test_scaled) == -1).astype(int)
 
-    final_model_if = IsolationForest(
-        n_estimators=best_params['n_estimators'],
-        contamination=best_params['contamination'],
-        random_state=42
-    )
-    final_model_if.fit(X_train_scaled)
+        feat_vote_sum = vote_f_if + vote_f_lof + vote_f_svm
+        feat_consensus = (feat_vote_sum >= FEAT_CONSENSUS_THRESHOLD).astype(int)
 
-    print("\n--- TUNE LOF/SVM & WEIGHTED ENSEMBLE VOTING ---")
+        for i, is_anom in enumerate(feat_consensus):
+            if is_anom:
+                m2_votes[i] += 1
+                m2_triggered_lists[i].append(feature)
 
-    test_df['Vote_IF'] = (final_model_if.predict(X_test_scaled) == -1).astype(int)
+        feat_path = FEAT_DIR / feature
+        feat_path.mkdir(parents=True, exist_ok=True)
+        joblib.dump(imputer_feat, feat_path / "imputer.joblib")
+        joblib.dump(scaler_feat, feat_path / "scaler.joblib")
+        joblib.dump(f_if, feat_path / "if_model.joblib")
+        joblib.dump(f_lof, feat_path / "lof_model.joblib")
+        joblib.dump(f_svm, feat_path / "svm_model.joblib")
 
-    best_lof_f1 = -1
-    best_lof_k = 20
-    for k in [10, 20, 50]:
-        model = LocalOutlierFactor(n_neighbors=k, contamination=best_params['contamination'], novelty=True)
-        model.fit(X_train_scaled)
-        preds = (model.predict(X_test_scaled) == -1).astype(int)
-        score = f1_score(test_df['Ground_Truth'], preds, zero_division=0)
-        if score > best_lof_f1:
-            best_lof_f1 = score
-            best_lof_k = k
+    feature_prediction = (m2_votes >= FEAT_VOTE_THRESHOLD).astype(int)
+    feature_consensus_count = int(feature_prediction.sum())
 
-    print(f"Best LOF: {best_lof_k} neighbours (F1: {best_lof_f1:.4f})")
-    final_model_lof = LocalOutlierFactor(
-        n_neighbors=best_lof_k,
-        contamination=best_params['contamination'],
-        novelty=True
-    )
-    final_model_lof.fit(X_train_scaled)
-    test_df['Vote_LOF'] = (final_model_lof.predict(X_test_scaled) == -1).astype(int)
+    final_anomaly = (global_prediction == 1) | (feature_prediction == 1)
+    combined_count = int(final_anomaly.sum())
 
-    best_svm_f1 = -1
-    best_svm_gamma = 'scale'
-    for g in ['scale', 'auto', 0.01, 0.1]:
-        model = OneClassSVM(nu=best_params['contamination'], kernel="rbf", gamma=g)
-        model.fit(X_train_scaled)
-        preds = (model.predict(X_test_scaled) == -1).astype(int)
-        score = f1_score(test_df['Ground_Truth'], preds, zero_division=0)
-        if score > best_svm_f1:
-            best_svm_f1 = score
-            best_svm_gamma = g
+    agreements = int((global_prediction == feature_prediction).sum())
 
-    print(f"Best SVM: gamma={best_svm_gamma} (F1: {best_svm_f1:.4f})")
-    final_model_svm = OneClassSVM(
-        nu=best_params['contamination'],
-        kernel="rbf",
-        gamma=best_svm_gamma
-    )
-    final_model_svm.fit(X_train_scaled)
-    test_df['Vote_SVM'] = (final_model_svm.predict(X_test_scaled) == -1).astype(int)
+    print(f"\n  Feature consensus flags: {feature_consensus_count} ({feature_consensus_count/total_test*100:.2f}%)")
+    print(f"  Combined flags (Global OR Feature): {combined_count} ({combined_count/total_test*100:.2f}%)")
+    print(f"  Global/Feature agreement rate: {agreements/total_test*100:.2f}%")
 
-    test_df['Weighted_Votes'] = (
-        test_df['Vote_IF'] * WEIGHT_IF +
-        test_df['Vote_LOF'] * WEIGHT_LOF +
-        test_df['Vote_SVM'] * WEIGHT_SVM
-    )
+    # Per-feature anomaly trigger counts (for Reports page feature importance)
+    feature_trigger_counts = {}
+    for feat_list in m2_triggered_lists:
+        for f in feat_list:
+            feature_trigger_counts[f] = feature_trigger_counts.get(f, 0) + 1
 
-    test_df['Final_Anomaly'] = (test_df['Weighted_Votes'] >= VOTE_THRESHOLD).astype(int)
-
-    print("\n--- PER-MODEL DIAGNOSTICS ---")
-    for col in ['Vote_IF', 'Vote_LOF', 'Vote_SVM', 'Final_Anomaly']:
-        flagged = test_df[col].sum()
-        f1 = f1_score(test_df['Ground_Truth'], test_df[col], zero_division=0)
-        print(f"{col}: flagged={flagged}, F1={f1:.4f}")
-
-    print("\n--- DEBOUNCER ---")
-    test_df['Debounced_Alarm'] = test_df['Final_Anomaly'].rolling(window=DEBOUNCE_WINDOW, min_periods=1).sum()
-    test_df['Flight_Ready_Anomaly'] = (test_df['Debounced_Alarm'] >= DEBOUNCE_HITS).astype(int)
-
-    print(f"Raw Anomalies (Committee):          {test_df['Final_Anomaly'].sum()}")
-    print(f"Flight-Ready Anomalies (Debounced): {test_df['Flight_Ready_Anomaly'].sum()}")
-
-    print("\n--- AI PERFORMANCE REPORT ---")
-    y_true = test_df['Ground_Truth']
-    y_pred_raw = test_df['Final_Anomaly']
-    y_pred_debounced = test_df['Flight_Ready_Anomaly']
-
-    f1_raw_committee = f1_score(y_true, y_pred_raw)
-    f1_debounced = f1_score(y_true, y_pred_debounced)
-
-    print(f"F1-Score (Raw Committee):   {f1_raw_committee:.4f}")
-    print(f"F1-Score (Debounced):       {f1_debounced:.4f}")
-
-    test_df['IF_Anomaly_Score'] = -final_model_if.decision_function(X_test_scaled)
-    roc_auc = roc_auc_score(y_true, test_df['IF_Anomaly_Score'])
-    print(f"ROC-AUC (Isolation Forest Score): {roc_auc:.4f}")
-
-    cm = confusion_matrix(y_true, y_pred_debounced)
-    print("\nConfusion Matrix:")
-    print(f"True Negatives  (Normal ignored correctly): {cm[0][0]}")
-    print(f"False Positives (False alarms):             {cm[0][1]}")
-    print(f"False Negatives (Missed anomalies):         {cm[1][0]}")
-    print(f"True Positives  (Anomalies caught):         {cm[1][1]}\n")
-
-    print("\n--- PERFORMANCE BY ANOMALY TYPE ---")
-    for anomaly_type in test_df['Anomaly_Type'].unique():
-        if anomaly_type == "Normal":
-            continue
-
-        subset = test_df[test_df['Anomaly_Type'].isin(["Normal", anomaly_type])].copy()
-        y_true_subset = subset['Ground_Truth']
-        y_pred_subset = subset['Flight_Ready_Anomaly']
-
-        f1_subset = f1_score(y_true_subset, y_pred_subset, zero_division=0)
-        precision_subset = precision_score(y_true_subset, y_pred_subset, zero_division=0)
-        recall_subset = recall_score(y_true_subset, y_pred_subset, zero_division=0)
-
-        print(f"{anomaly_type}:")
-        print(f"   F1:        {f1_subset:.4f}")
-        print(f"   Precision: {precision_subset:.4f}")
-        print(f"   Recall:    {recall_subset:.4f}")
-
-    print("\n--- ROOT CAUSE ANALYSIS ---")
-    extract_root_causes(test_df, advanced_features, train_df)
-
-    export_path = DATA_DIR / "STAR_Pulse_Graded_Telemetry.csv"
-    test_df.to_csv(export_path, index=False)
-    print(f"Saved graded telemetry to {export_path}")
-
-    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    joblib.dump(imputer, ARTIFACTS_DIR / "imputer.joblib")
-    joblib.dump(scaler, ARTIFACTS_DIR / "scaler.joblib")
-    joblib.dump(final_model_if, ARTIFACTS_DIR / "if_model.joblib")
-    joblib.dump(final_model_lof, ARTIFACTS_DIR / "lof_model.joblib")
-    joblib.dump(final_model_svm, ARTIFACTS_DIR / "svm_model.joblib")
-
-    # The ONLY addition to the original main()
-    total_predictions = np.sum(cm)
-    accuracy = (cm[0][0] + cm[1][1]) / total_predictions if total_predictions > 0 else 0
     metrics = {
-        "f1_score": float(round(f1_debounced, 4)),
-        "accuracy": float(round(accuracy * 100, 1)),
-        "confusion_matrix": {
-            "tn": int(cm[0][0]), "fp": int(cm[0][1]),
-            "fn": int(cm[1][0]), "tp": int(cm[1][1])
-        }
+        "training_rows": len(train_df),
+        "test_rows": total_test,
+        "global_if_flags": if_flags,
+        "global_lof_flags": lof_flags,
+        "global_svm_flags": svm_flags,
+        "global_if_flag_rate": round(if_flags / total_test * 100, 2),
+        "global_lof_flag_rate": round(lof_flags / total_test * 100, 2),
+        "global_svm_flag_rate": round(svm_flags / total_test * 100, 2),
+        "global_consensus_count": global_consensus_count,
+        "global_consensus_rate": round(global_consensus_count / total_test * 100, 2),
+        "feature_consensus_count": feature_consensus_count,
+        "feature_consensus_rate": round(feature_consensus_count / total_test * 100, 2),
+        "combined_anomaly_count": combined_count,
+        "combined_anomaly_rate": round(combined_count / total_test * 100, 2),
+        "agreement_rate": round(agreements / total_test * 100, 2),
+        "feature_trigger_counts": feature_trigger_counts,
     }
+
     with open(ARTIFACTS_DIR / "training_metrics.json", "w") as f:
         json.dump(metrics, f, indent=4)
 
-    print(f"Saved artefacts to {ARTIFACTS_DIR}")
+    print("\nAll artifacts and real metrics saved successfully.")
+    print(f"Metrics: {json.dumps(metrics, indent=2)}")
 
 if __name__ == "__main__":
     main()

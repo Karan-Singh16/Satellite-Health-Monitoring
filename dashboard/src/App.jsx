@@ -1,22 +1,26 @@
 // src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Telemetry from './pages/Telemetry';
 import Anomalies from './pages/Anomalies';
-import Reports from './pages/Reports'; // Added back
+import Reports from './pages/Reports';
 import Footer from './components/Footer';
 import Login from './pages/Login';
+import SignUp from './pages/Sign-Up';
 import SplashScreen from './pages/SplashScreen';
+import Settings from './pages/Settings';
 
-// This helper component hides the Navbar/Footer on specific pages
+const isAuthenticated = () => !!localStorage.getItem('starPulseToken');
+
+const ProtectedRoute = ({ children }) => {
+  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+};
+
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
-  
-  // Hide UI elements on Splash (/) and Login (/login)
-  // Note: Your dashboard is now at /dashboard, so we keep UI hidden for the landing pages
-  const hideUI = location.pathname === '/' || location.pathname === '/login';
+  const hideUI = ['/', '/login', '/register'].includes(location.pathname);
 
   return (
     <div className="app-container">
@@ -34,17 +38,20 @@ function App() {
     <Router>
       <LayoutWrapper>
         <Routes>
-          {/* Landing / Entry Routes (UI Hidden) */}
+          {/* Public routes */}
           <Route path="/" element={<SplashScreen />} />
           <Route path="/login" element={<Login />} />
-          
-          {/* Main Dashboard Routes (UI Visible) */}
-          <Route path="/dashboard" element={<Home />} />
-          <Route path="/telemetry" element={<Telemetry />} />
-          <Route path="/anomalies" element={<Anomalies />} />
-          <Route path="/reports" element={<Reports />} />
-          
-          {/* You can add a /settings route here later */}
+          <Route path="/register" element={<SignUp />} />
+
+          {/* Protected dashboard routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/telemetry" element={<ProtectedRoute><Telemetry /></ProtectedRoute>} />
+          <Route path="/anomalies" element={<ProtectedRoute><Anomalies /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </LayoutWrapper>
     </Router>

@@ -2,24 +2,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './Telemetry.css';
 
-// The exact mapping of your Django backend features to the UI
+// Exactly the 10 features used by the ML ensemble — no more, no less
 const TELEMETRY_MAP = [
-  { id: 'EPS_VOLT_01', ml_feature: 'battery_voltage', category: 'Power (EPS)', label: 'Battery Voltage', unit: 'V' },
-  { id: 'EPS_CURR_01', ml_feature: 'average_current', category: 'Power (EPS)', label: 'Avg Current', unit: 'A' },
-  { id: 'EPS_TEMP_01', ml_feature: 'EPS_temperature', category: 'Thermal (TCS)', label: 'EPS Temp', unit: '°C' },
-  { id: 'BNO_TEMP_01', ml_feature: 'BNO055_temperature', category: 'Thermal (TCS)', label: 'BNO055 Temp', unit: '°C' },
-  { id: 'GYRO_X_01', ml_feature: 'gyro_X', category: 'Attitude (ADCS)', label: 'Gyro X', unit: 'd/s' },
-  { id: 'GYRO_Y_01', ml_feature: 'gyro_Y', category: 'Attitude (ADCS)', label: 'Gyro Y', unit: 'd/s' },
-  { id: 'GYRO_Z_01', ml_feature: 'gyro_Z', category: 'Attitude (ADCS)', label: 'Gyro Z', unit: 'd/s' },
-  { id: 'MAG_X_01', ml_feature: 'mag_X', category: 'Attitude (ADCS)', label: 'Mag X', unit: 'uT' },
-  { id: 'MAG_Y_01', ml_feature: 'mag_Y', category: 'Attitude (ADCS)', label: 'Mag Y', unit: 'uT' },
-  { id: 'MAG_Z_01', ml_feature: 'mag_Z', category: 'Attitude (ADCS)', label: 'Mag Z', unit: 'uT' },
-  { id: 'ENG_DELT_V', ml_feature: 'delta_battery_voltage', category: 'ML Engineering', label: 'Delta Volt', unit: 'V/s' },
-  { id: 'ENG_DELT_T', ml_feature: 'delta_EPS_temp', category: 'ML Engineering', label: 'Delta EPS Temp', unit: '°C/s' },
-  { id: 'ENG_DELT_A', ml_feature: 'delta_altitude', category: 'ML Engineering', label: 'Delta Altitude', unit: 'm/s' },
-  { id: 'ENG_MAG_TOT', ml_feature: 'mag_total', category: 'ML Engineering', label: 'Total Mag Vector', unit: 'uT' },
-  { id: 'ENG_GYR_TOT', ml_feature: 'gyro_total', category: 'ML Engineering', label: 'Total Gyro Vector', unit: 'd/s' },
-  { id: 'ENG_PWR_DIS', ml_feature: 'power_discrepancy', category: 'Power (EPS)', label: 'Power Discrepancy', unit: 'W' }
+  { id: 'EPS_VOLT_01', ml_feature: 'battery_voltage',    category: 'Power (EPS)',    label: 'Battery Voltage',     unit: 'V'   },
+  { id: 'EPS_CURR_01', ml_feature: 'average_current',    category: 'Power (EPS)',    label: 'Avg Current',         unit: 'mA'  },
+  { id: 'EPS_PWR_01',  ml_feature: 'average_power',      category: 'Power (EPS)',    label: 'Avg Power',           unit: 'W'   },
+  { id: 'EPS_CAP_01',  ml_feature: 'remaining_capacity', category: 'Power (EPS)',    label: 'Remaining Capacity',  unit: 'mAh' },
+  { id: 'GYRO_X_01',  ml_feature: 'gyro_X',             category: 'Attitude (ADCS)', label: 'Gyro X',             unit: '°/s' },
+  { id: 'GYRO_Y_01',  ml_feature: 'gyro_Y',             category: 'Attitude (ADCS)', label: 'Gyro Y',             unit: '°/s' },
+  { id: 'GYRO_Z_01',  ml_feature: 'gyro_Z',             category: 'Attitude (ADCS)', label: 'Gyro Z',             unit: '°/s' },
+  { id: 'EPS_TEMP_01', ml_feature: 'EPS_temperature',   category: 'Thermal (TCS)',  label: 'EPS Temperature',     unit: '°C'  },
+  { id: 'ADCS_TMP_01', ml_feature: 'ADCS_temperature1', category: 'Thermal (TCS)',  label: 'ADCS Temperature',    unit: '°C'  },
+  { id: 'BNO_TEMP_01', ml_feature: 'BNO055_temperature', category: 'Thermal (TCS)', label: 'BNO055 Temperature',  unit: '°C'  },
 ];
 
 const Telemetry = () => {
@@ -130,7 +124,6 @@ const Telemetry = () => {
             <option value="Power (EPS)">Power (EPS)</option>
             <option value="Thermal (TCS)">Thermal (TCS)</option>
             <option value="Attitude (ADCS)">Attitude (ADCS)</option>
-            <option value="ML Engineering">ML Engineering</option>
           </select>
           <button className="export-btn" onClick={handleExportCSV}>EXPORT CSV</button>
         </div>

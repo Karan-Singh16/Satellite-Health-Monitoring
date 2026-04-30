@@ -1,0 +1,205 @@
+/* src/pages/Settings.css */
+
+.settings-page {
+  padding: 2rem;
+  color: #f8fcf8;
+  min-height: 100%;
+  background-color: #0b0d11;
+}
+
+.settings-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #392d2f;
+  padding-bottom: 1rem;
+}
+
+.settings-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin: 0 0 0.25rem;
+}
+
+.settings-header .subtitle {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 900px;
+}
+
+.settings-card {
+  background: #161a22;
+  border: 1px solid #2d3139;
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.settings-card h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin: 0 0 1.25rem;
+}
+
+/* Account */
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.account-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin: 0 0 0.2rem;
+}
+
+.account-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* History */
+.settings-hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: -0.5rem 0 1rem;
+}
+
+.settings-hint strong {
+  color: #94a3b8;
+}
+
+.settings-empty {
+  color: #475569;
+  font-size: 0.85rem;
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.settings-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.history-table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.history-table th {
+  text-align: left;
+  color: #64748b;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #2d3139;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.history-table td {
+  padding: 0.65rem 0.75rem;
+  color: #cbd5e1;
+  border-bottom: 1px solid #1e2330;
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tbody tr:hover td {
+  background: #1a1e2a;
+}
+
+.row-num {
+  color: #475569;
+  font-family: monospace;
+  width: 32px;
+}
+
+.filename-cell {
+  font-family: monospace;
+  color: #93c5fd;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date-cell {
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.alarm-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.alarm-badge.has-alarms {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.alarm-badge.no-alarms {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.load-btn {
+  background: #1e3a5f;
+  color: #60a5fa;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.load-btn:hover:not(:disabled) {
+  background: #2563eb;
+  color: #fff;
+}
+
+.load-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

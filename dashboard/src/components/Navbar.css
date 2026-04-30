@@ -52,3 +52,31 @@
   color: #ffffff;
   border-bottom: 2px solid #3b82f6;
 }
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-username {
+  color: #64748b;
+  font-size: 0.8rem;
+  font-family: 'Courier New', monospace;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #2d3139;
+  color: #94a3b8;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.logout-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}

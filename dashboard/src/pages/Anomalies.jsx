@@ -36,8 +36,8 @@ const Anomalies = () => {
         
         // Map feature names to human-readable subsystems
         const primaryFeature = row.top_causes && row.top_causes.length > 0 ? row.top_causes[0].feature : 'Unknown';
-        const subsystem = primaryFeature.includes('volt') || primaryFeature.includes('curr') || primaryFeature.includes('power') ? 'Power (EPS)' : 
-                          primaryFeature.includes('gyro') || primaryFeature.includes('mag') ? 'Attitude (ADCS)' : 
+        const subsystem = primaryFeature.includes('volt') || primaryFeature.includes('curr') || primaryFeature.includes('power') || primaryFeature.includes('capacity') ? 'Power (EPS)' : 
+                          primaryFeature.includes('gyro') ? 'Attitude (ADCS)' : 
                           primaryFeature.includes('temp') ? 'Thermal (TCS)' : 'System Bus';
 
         return {
@@ -152,31 +152,37 @@ const Anomalies = () => {
                 </div>
               </div>
 
-              {/* TRUTHFUL FEATURE CONTRIBUTION CHART */}
-              <div className="feature-chart-container">
-                <h5 style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase' }}>
-                  Sensor Z-Score Deviation from Baseline
-                </h5>
-                <div style={{ width: '100%', height: 220, background: '#11141b', padding: '10px', borderRadius: '4px', border: '1px solid #2d3139' }}>
-                  <ResponsiveContainer>
-                    <BarChart data={getChartData(selectedAnomaly.causes)} layout="vertical" margin={{ left: 30, right: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2d3139" horizontal={false} />
-                      <XAxis type="number" stroke="#64748b" fontSize={10} />
-                      <YAxis dataKey="feature" type="category" stroke="#94a3b8" fontSize={10} width={120} />
-                      <Tooltip 
-                        cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                        contentStyle={{ background: '#1a1e26', border: '1px solid #2d3139', color: '#f8fafc', fontSize: '12px' }}
-                        formatter={(value) => [`${value}σ (Z-Score)`, 'Deviation']}
-                      />
-                      <Bar dataKey="z_score" radius={[0, 4, 4, 0]}>
-                        {getChartData(selectedAnomaly.causes).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : '#3b82f6'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+              {/* Feature trigger chart — only shown for feature-specific anomalies, not global-only */}
+              {selectedAnomaly.causes.length > 0 && selectedAnomaly.causes[0].feature !== 'Global Ensemble' ? (
+                <div className="feature-chart-container">
+                  <h5 style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase' }}>
+                    Triggered Sensor Features (Feature-Specific Ensemble)
+                  </h5>
+                  <div style={{ width: '100%', height: 220, background: '#11141b', padding: '10px', borderRadius: '4px', border: '1px solid #2d3139' }}>
+                    <ResponsiveContainer>
+                      <BarChart data={getChartData(selectedAnomaly.causes)} layout="vertical" margin={{ left: 30, right: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#2d3139" horizontal={false} />
+                        <XAxis type="number" stroke="#64748b" fontSize={10} domain={[0, 1]} ticks={[0, 1]} />
+                        <YAxis dataKey="feature" type="category" stroke="#94a3b8" fontSize={10} width={120} />
+                        <Tooltip
+                          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                          contentStyle={{ background: '#1a1e26', border: '1px solid #2d3139', color: '#f8fafc', fontSize: '12px' }}
+                          formatter={() => ['Consensus flag (IF + LOF + SVM agreed)', 'Status']}
+                        />
+                        <Bar dataKey="z_score" radius={[0, 4, 4, 0]}>
+                          {getChartData(selectedAnomaly.causes).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#ef4444' : '#3b82f6'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#11141b', border: '1px solid #2d3139', borderRadius: '4px', color: '#64748b', fontSize: '0.8rem' }}>
+                  Global cross-channel anomaly — all three models agreed on a multivariate outlier. No single sensor feature identified as the primary trigger.
+                </div>
+              )}
 
               {/* Actionable Intelligence Block */}
               <div className="action-recommendation" style={{ marginTop: '2rem', padding: '1rem', background: '#11141b', border: '1px solid #2d3139', borderRadius: '4px', color: '#cbd5e1', fontSize: '0.85rem' }}>

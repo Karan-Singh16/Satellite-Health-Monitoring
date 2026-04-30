@@ -21,10 +21,21 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third Party Apps
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
     # Your Apps
     "telemetry", 
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny', # AllowAny by default, override in specific views
+    ],
+}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware", # Must be at the top
@@ -87,4 +98,9 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = 'static/'
+
+# Media files (user-uploaded telemetry datasets)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

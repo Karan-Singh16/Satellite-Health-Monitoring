@@ -1,29 +1,139 @@
+/* SplashScreen.css */
+
 .splash-container {
-  height: 100vh;
-  width: 100vw;
+  position: fixed;
+  inset: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #000000; /* Matching your dashboard theme */
+  background-color: #0b0d11;
+  overflow: hidden;
+  z-index: 9999;
 }
 
-.logo {
-  height: 800px; /* Adjust size as needed */
+/* Subtle dot-grid background */
+.splash-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #1e2330 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.6;
+}
+
+/* Blue radial glow behind the logo */
+.splash-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Main content column */
+.splash-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: splashFadeIn 0.8s ease forwards;
+}
+
+.splash-logo {
+  height: 140px;
   width: auto;
-  animation: pulseFade 2.7s ease-in-out forwards;
+  animation: logoFloat 3.5s ease-in-out forwards;
+  filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.4));
 }
 
-@keyframes pulseFade {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.splash-title-block {
+  text-align: center;
+  animation: slideUp 0.9s ease 0.3s both;
+}
+
+.splash-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  color: #f8fafc;
+  margin: 0 0 0.4rem;
+  font-family: 'Courier New', monospace;
+}
+
+.splash-subtitle {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Pulsing status indicator */
+.splash-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  animation: slideUp 0.9s ease 0.6s both;
+}
+
+.splash-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.splash-status-text {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: #3b82f6;
+  font-family: 'Courier New', monospace;
+}
+
+/* Progress bar */
+.splash-progress-track {
+  width: 280px;
+  height: 2px;
+  background: #1e2330;
+  border-radius: 2px;
+  overflow: hidden;
+  animation: slideUp 0.9s ease 0.8s both;
+}
+
+.splash-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #1d4ed8, #3b82f6, #60a5fa);
+  border-radius: 2px;
+  animation: fillBar 3.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+/* Keyframes */
+@keyframes splashFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes logoFloat {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.95); }
+  30%  { opacity: 1; transform: translateY(0)    scale(1);    }
+  85%  { opacity: 1; transform: translateY(0)    scale(1);    }
+  100% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1;   transform: scale(1);    }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: 100%; }
 }
