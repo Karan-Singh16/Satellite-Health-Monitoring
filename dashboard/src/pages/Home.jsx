@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import './Home.css';
 import SatTrackingMap from '../components/SatTrackingMap';
 
-// The complete list of telemetry parameters from the Improved ML Model
+// All 11 parameters rendered as individual charts — IF_Anomaly_Score + the 10 sensor features
 const AVAILABLE_PARAMETERS = [
   { id: 'IF_Anomaly_Score', label: 'AI Risk Score (Isolation Forest)' },
   { id: 'battery_voltage', label: 'Battery Voltage (V)' },
@@ -44,6 +44,7 @@ const Home = () => {
     formData.append("file", selectedFile);
 
     try {
+      // Token attached so the protected upload endpoint can identify the user
       const token = localStorage.getItem('starPulseToken');
       const response = await fetch("http://127.0.0.1:8000/api/telemetry/upload/", {
         method: "POST",
@@ -53,11 +54,13 @@ const Home = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Inference Engine Error");
 
+      // Persist a trimmed version to localStorage so other pages can read it without re-fetching
+      // anomalies_only: only the flagged rows (used by Anomalies page)
+      // timeseries: first 150 rows for chart rendering (balance between density and performance)
       const persistentData = {
-        summary: data.summary,
+        summary:        data.summary,
         anomalies_only: data.per_row_results.filter(row => row.Flight_Ready_Anomaly === 1),
-        // Grab the first 150 rows so the graphs are dense but performant
-        timeseries: data.per_row_results.slice(0, 150) 
+        timeseries:     data.per_row_results.slice(0, 150)
       };
 
       setMlResults(persistentData);
@@ -77,13 +80,13 @@ const Home = () => {
     window.location.reload(); 
   };
 
-  // --- OMNI-GRAPH ENGINE ---
-  // Transforms the Django JSON into a format Recharts can easily plot for EVERY parameter
+  // Transforms the Django JSON into a flat object per row that Recharts can plot
+  // isAnomaly flag drives the AnomalyDot renderer — marks flagged points with a red X
   const graphData = useMemo(() => {
     if (!mlResults || !mlResults.timeseries) return [];
-    
+
     return mlResults.timeseries.map((row) => {
-      // Convert the raw ISO timestamp into a clean HH:MM:SS string
+      // Convert ISO timestamp to HH:MM:SS for the X-axis labels
       let timeStr = "N/A";
       if (row.timestamp) {
         const dateObj = new Date(row.timestamp);
@@ -91,10 +94,11 @@ const Home = () => {
       }
 
       const dataPoint = {
-        time: timeStr,
+        time:      timeStr,
         isAnomaly: row.Final_Anomaly === 1,
       };
 
+      // Flatten all 11 parameter values into the same object so one array drives all charts
       AVAILABLE_PARAMETERS.forEach(param => {
         const val = row[param.id] !== undefined ? row[param.id] : 0;
         dataPoint[param.id] = parseFloat(Number(val).toFixed(4));
@@ -104,7 +108,8 @@ const Home = () => {
     });
   }, [mlResults]);
 
-  // Renders a red X marker for anomaly points, nothing for normal points 
+  // Custom Recharts dot renderer — draws a red X cross on anomalous data points
+  // Returns null for normal points so the default dot is suppressed entirely
   const AnomalyDot = (props) => {
     const { cx, cy, payload } = props;
     if (!payload?.isAnomaly) return null;
