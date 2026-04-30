@@ -23,8 +23,10 @@ from telemetry.ml.features import (
     engineer_feature_specific
 )
 from telemetry.ml.config import (
-    GLOBAL_IF_CONTAM, GLOBAL_LOF_CONTAM, GLOBAL_SVM_NU, GLOBAL_VOTE_THRESHOLD,
-    FEAT_IF_CONTAM, FEAT_LOF_CONTAM, FEAT_SVM_NU, FEAT_CONSENSUS_THRESHOLD, FEAT_VOTE_THRESHOLD
+    GLOBAL_IF_N_ESTIMATORS, GLOBAL_IF_CONTAM,
+    GLOBAL_LOF_N_NEIGHBORS, GLOBAL_LOF_CONTAM, GLOBAL_SVM_NU, GLOBAL_VOTE_THRESHOLD,
+    FEAT_IF_N_ESTIMATORS, FEAT_IF_CONTAM,
+    FEAT_LOF_N_NEIGHBORS, FEAT_LOF_CONTAM, FEAT_SVM_NU, FEAT_CONSENSUS_THRESHOLD, FEAT_VOTE_THRESHOLD
 )
 
 BASE_DIR = Path(__file__).resolve().parents[3]          # = backend/
@@ -73,11 +75,11 @@ def main():
     X_test_scaled  = scaler_global.transform(X_test_imputed)
 
     # Isolation Forest: isolates anomalies by randomly partitioning feature space
-    global_if = IsolationForest(n_estimators=100, contamination=GLOBAL_IF_CONTAM, random_state=42)
+    global_if = IsolationForest(n_estimators=GLOBAL_IF_N_ESTIMATORS, contamination=GLOBAL_IF_CONTAM, random_state=42, n_jobs=-1)
     global_if.fit(X_train_scaled)
 
     # Local Outlier Factor: flags points with significantly lower density than their neighbours
-    global_lof = LocalOutlierFactor(n_neighbors=250, contamination=GLOBAL_LOF_CONTAM, novelty=True)
+    global_lof = LocalOutlierFactor(n_neighbors=GLOBAL_LOF_N_NEIGHBORS, contamination=GLOBAL_LOF_CONTAM, novelty=True, n_jobs=-1)
     global_lof.fit(X_train_scaled)
 
     # One-Class SVM: learns a hypersphere boundary around normal data in RBF kernel space
@@ -135,8 +137,8 @@ def main():
         feat_test_scaled  = scaler_feat.transform(feat_test_imputed)
 
         # Smaller models per feature: fewer estimators, tighter contamination
-        f_if  = IsolationForest(n_estimators=50, contamination=FEAT_IF_CONTAM, random_state=42)
-        f_lof = LocalOutlierFactor(n_neighbors=150, contamination=FEAT_LOF_CONTAM, novelty=True)
+        f_if  = IsolationForest(n_estimators=FEAT_IF_N_ESTIMATORS, contamination=FEAT_IF_CONTAM, random_state=42, n_jobs=-1)
+        f_lof = LocalOutlierFactor(n_neighbors=FEAT_LOF_N_NEIGHBORS, contamination=FEAT_LOF_CONTAM, novelty=True, n_jobs=-1)
         f_svm = OneClassSVM(nu=FEAT_SVM_NU, kernel="rbf", gamma='auto')
 
         f_if.fit(feat_train_scaled)

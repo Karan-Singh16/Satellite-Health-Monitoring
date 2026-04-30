@@ -13,7 +13,8 @@
       "Bash(venv/Scripts/python manage.py showmigrations telemetry)",
       "Bash(venv/Scripts/pip install *)",
       "Bash(venv/Scripts/python -m pip install -r requirements.txt)",
-      "Bash(venv/Scripts/python manage.py check)"
+      "Bash(venv/Scripts/python manage.py check)",
+      "Bash(python -c \"import os, time; f='backend/telemetry/ml/artifacts/global/if_model.joblib'; t=os.path.getmtime\\(f\\); print\\('Last modified:', time.ctime\\(t\\)\\)\")"
     ]
   }
 }

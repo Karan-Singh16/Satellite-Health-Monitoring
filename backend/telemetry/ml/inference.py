@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from django.conf import settings
 from .features import parse_datetime_column, engineer_feature_specific, selected_features
-from .config import GLOBAL_VOTE_THRESHOLD, FEAT_CONSENSUS_THRESHOLD, FEAT_VOTE_THRESHOLD
+from .config import GLOBAL_VOTE_THRESHOLD, FEAT_CONSENSUS_THRESHOLD, FEAT_VOTE_THRESHOLD, REQUIRED_COLUMNS
 
 # Paths to the trained model artifacts saved after running train_models.py
 ARTIFACTS_DIR = os.path.join(settings.BASE_DIR, 'telemetry', 'ml', 'artifacts')
@@ -18,7 +18,7 @@ def load_global_artifacts():
     scaler = joblib.load(os.path.join(GLOBAL_DIR, 'scaler.joblib'))
     model_if = joblib.load(os.path.join(GLOBAL_DIR, 'if_model.joblib'))
     model_lof = joblib.load(os.path.join(GLOBAL_DIR, 'lof_model.joblib'))
-    model_svm = joblib.load(os.path.join(ARTIFACTS_DIR, 'global', 'svm_model.joblib'))
+    model_svm = joblib.load(os.path.join(GLOBAL_DIR, 'svm_model.joblib'))
     return imputer, scaler, model_if, model_lof, model_svm
 
 def load_feature_artifacts(feature):
@@ -55,6 +55,10 @@ def analyse_dataframe(df):
     Runs the two-stage ensemble and returns per-row results + summary stats.
     """
     start_time = time.time()
+
+    missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {', '.join(missing)}")
 
     # Sort chronologically so temporal features (rolling windows) are computed correctly
     df = parse_datetime_column(df)

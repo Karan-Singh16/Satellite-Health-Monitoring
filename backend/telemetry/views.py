@@ -309,13 +309,19 @@ def upload_benchmark(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        y_true = df[gt_key].astype(int).values
-
         from .ml.inference import analyse_dataframe
+        from .ml.features import parse_datetime_column
         from sklearn.metrics import (
             f1_score, precision_score, recall_score,
             accuracy_score, roc_auc_score, confusion_matrix
         )
+
+        # Pre-sort by timestamp to match the order analyse_dataframe produces internally.
+        # Without this, y_true[i] and y_pred[i] refer to different rows when the file
+        # isn't already in chronological order, making all metrics meaningless.
+        df = parse_datetime_column(df)
+        df = df.sort_values('Datetime').reset_index(drop=True)
+        y_true = df[gt_key].astype(int).values
 
         result_data = analyse_dataframe(df)
         y_pred   = [int(r['Final_Anomaly'])      for r in result_data['per_row_results']]
