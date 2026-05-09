@@ -1,8 +1,8 @@
 // src/components/Navbar.jsx
 import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import './Navbar.css';
-import logoImg from '../assets/Logo.png';
+import './navbar.css';
+import logoImg from '../assets/logo.png';
 
 const Navbar = () => {
   const navigate = useNavigate();

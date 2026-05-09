@@ -1,8 +1,8 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
-import './Home.css';
-import SatTrackingMap from '../components/SatTrackingMap';
+import './home.css';
+import SatTrackingMap from '../components/satTrackingMap';
 
 // All 11 parameters rendered as individual charts — IF_Anomaly_Score + the 10 sensor features
 const AVAILABLE_PARAMETERS = [
@@ -57,10 +57,12 @@ const Home = () => {
       // Persist a trimmed version to localStorage so other pages can read it without re-fetching
       // anomalies_only: only the flagged rows (used by Anomalies page)
       // timeseries: first 150 rows for chart rendering (balance between density and performance)
+      // The backend already returns a representative downsampled timeseries (~500 pts).
+      // Use it directly so charts span the full mission timeline.
       const persistentData = {
         summary:        data.summary,
         anomalies_only: data.per_row_results.filter(row => row.Flight_Ready_Anomaly === 1),
-        timeseries:     data.per_row_results.slice(0, 150)
+        timeseries:     data.timeseries ?? data.per_row_results.slice(0, 150),
       };
 
       setMlResults(persistentData);
@@ -90,7 +92,10 @@ const Home = () => {
       let timeStr = "N/A";
       if (row.timestamp) {
         const dateObj = new Date(row.timestamp);
-        timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const mon = dateObj.toLocaleString('en', { month: 'short' });
+        const day = dateObj.getDate();
+        const hhmm = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timeStr = `${mon} ${day} ${hhmm}`;
       }
 
       const dataPoint = {

@@ -1,7 +1,7 @@
 // src/pages/Reports.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import './Reports.css';
+import './reports.css';
 
 const FEATURE_LABELS = {
   battery_voltage: 'Battery Voltage',

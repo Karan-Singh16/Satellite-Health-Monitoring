@@ -171,9 +171,27 @@ def upload_telemetry(request):
         from .ml.inference import analyse_dataframe
         result_data = analyse_dataframe(df)
 
-        # Separate anomalous rows for the Anomalies page; take first 150 rows for chart rendering
+        # Separate anomalous rows for the Anomalies page
         anomalies_only = [r for r in result_data['per_row_results'] if r.get('Flight_Ready_Anomaly') == 1]
-        timeseries     = result_data['per_row_results'][:150]
+
+        # Build a representative timeseries for chart rendering:
+        # always keep every anomaly row, then evenly sample normal rows to fill up to TARGET points.
+        # This ensures charts span the full mission timeline regardless of file size.
+        TARGET = 500
+        all_rows     = result_data['per_row_results']
+        normal_rows  = [r for r in all_rows if not r.get('Final_Anomaly')]
+        remaining    = max(0, TARGET - len(anomalies_only))
+        if remaining == 0:
+            normal_sample = []
+        elif len(normal_rows) > remaining:
+            step          = len(normal_rows) / remaining
+            normal_sample = [normal_rows[int(i * step)] for i in range(remaining)]
+        else:
+            normal_sample = normal_rows
+        timeseries = sorted(
+            anomalies_only + normal_sample,
+            key=lambda r: r.get('timestamp') or ''
+        )
 
         # seek(0) rewinds the file pointer after pandas consumed it, so Django can re-read it for saving
         file_obj.seek(0)
@@ -218,6 +236,9 @@ def upload_telemetry(request):
 
         TelemetryRecord.objects.bulk_create(records, batch_size=500)
 
+        # Attach the downsampled timeseries to the response so the frontend chart
+        # gets the full mission timeline rather than an arbitrary head slice.
+        result_data['timeseries'] = timeseries
         return Response(result_data, status=status.HTTP_200_OK)
 
     except ValueError as ve:

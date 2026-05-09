@@ -31,7 +31,7 @@ def load_feature_artifacts(feature):
     model_svm = joblib.load(os.path.join(path, 'svm_model.joblib'))
     return imputer, scaler, model_if, model_lof, model_svm
 
-# Module-level cache so artifacts are only loaded from disk once per server lifetime
+# Module-level cache — populated on first request, cleared by restarting the server
 GLOBAL_ARTIFACTS = None
 FEATURE_ARTIFACTS = {}
 

@@ -1,6 +1,6 @@
 // src/pages/Telemetry.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import './Telemetry.css';
+import './telemetry.css';
 
 // Exactly the 10 features used by the ML ensemble — no more, no less
 const TELEMETRY_MAP = [

@@ -1,7 +1,7 @@
 // src/pages/Anomalies.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import './Anomalies.css';
+import './anomalies.css';
 
 // Converts the raw IF decision score into a 0–100% intensity value
 // Negative scores indicate anomalies; -0.20 is treated as total deviation (100%)

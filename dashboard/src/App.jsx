@@ -1,16 +1,16 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Telemetry from './pages/Telemetry';
-import Anomalies from './pages/Anomalies';
-import Reports from './pages/Reports';
-import Footer from './components/Footer';
-import Login from './pages/Login';
-import SignUp from './pages/Sign-Up';
-import SplashScreen from './pages/SplashScreen';
-import Settings from './pages/Settings';
+import Navbar from './components/navbar';
+import Home from './pages/home';
+import Telemetry from './pages/telemetry';
+import Anomalies from './pages/anomalies';
+import Reports from './pages/reports';
+import Footer from './components/footer';
+import Login from './pages/login';
+import SignUp from './pages/sign-Up';
+import SplashScreen from './pages/splashScreen';
+import Settings from './pages/settings';
 
 const isAuthenticated = () => !!localStorage.getItem('starPulseToken');
 

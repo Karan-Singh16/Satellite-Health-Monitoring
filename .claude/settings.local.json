@@ -16,7 +16,11 @@
       "Bash(venv/Scripts/python manage.py check)",
       "Bash(python -c \"import os, time; f='backend/telemetry/ml/artifacts/global/if_model.joblib'; t=os.path.getmtime\\(f\\); print\\('Last modified:', time.ctime\\(t\\)\\)\")",
       "Bash(python -c ' *)",
-      "Bash('C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe' -c ' *)"
+      "Bash('C:\\\\Users\\\\karan\\\\University\\\\Final Year Project\\\\Satellite-Health-Monitoring\\\\.venv\\\\Scripts\\\\python.exe' -c ' *)",
+      "Bash(.venv\\\\Scripts\\\\python.exe -m telemetry.ml.training.train_models)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
